@@ -31,12 +31,16 @@ class MainScene: SCNScene {
     // Initializer
     override init() {
         super.init()
-        
+            
         background.contents = UIColor.black
         
         setupCamera()
         setupBackgroundLayers()
         setupForegroundLevel()
+        
+        //firing---
+        
+        //------
         
         Task(priority: .userInitiated) {
             //            await firstUpdate()
@@ -98,8 +102,16 @@ class MainScene: SCNScene {
         groundNode.position = SCNVector3(0, groundPosition-(levelheight/2), -levelSquaredArea/2)
         
         
-        
         rootNode.addChildNode(groundNode)
+    }
+    
+    //-------------------------------------------------------------------
+    //Firing Code
+    //-------------------------------------------------------------------
+    //function that's sent to coordinator
+    @objc
+    func toggleFire(){
+        print("ran")
     }
     
 }

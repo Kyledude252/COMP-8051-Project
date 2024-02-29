@@ -7,6 +7,8 @@
 import SceneKit
 
 class Tank: SCNNode {
+    var moveSpeed: Float = 0.1
+    
     init(position: SCNVector3, color: UIColor) {
         super.init()
         
@@ -19,5 +21,13 @@ class Tank: SCNNode {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func moveLeft() {
+            self.position.x -= moveSpeed
+        }
+        
+    func moveRight() {
+        self.position.x += moveSpeed
     }
 }

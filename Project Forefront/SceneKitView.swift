@@ -12,6 +12,7 @@ import SceneKit
 struct SceneKitView: UIViewRepresentable {
     let scene: SCNScene
     
+    
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView(frame: .zero)
         scnView.scene = scene
@@ -23,17 +24,4 @@ struct SceneKitView: UIViewRepresentable {
         // No updates needed
     }
 }
-//struct SceneKitView: UIViewRepresentable {
-//    func makeUIView(context: Context) -> SCNView {
-//        let sceneView = SCNView()
-//
-//        let scene = SCNScene(named: "MainScene.scn")!
-//        sceneView.scene = scene
-//
-//        return sceneView
-//    }
-//
-//    func updateUIView(_ uiView: SCNView, context: Context) {
-//        // Update your SceneKit view if needed
-//    }
-//}
+

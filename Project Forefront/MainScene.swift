@@ -12,16 +12,18 @@ import SceneKit
 class MainScene: SCNScene {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
-    var cameraYOffset: Float = 1
-    var cameraZOffset: Float = 25 // half of level width
-    
+    var cameraYOffset: Float = 0
+    var cameraZOffset: Float = 35
     var player1Tank: Tank!
     var player2Tank: Tank!
+    var activePlayer: Int = 1
+    var tankMovingLeft = false
+    var tankMovingRight = false
+    var movementPlayerSteps = 0
+    var maxMovementPlayerSteps = 25 //TODO /TURNS
     
-    // Level // //////
     var groundPosition: CGFloat = -8
-    var levelSquaredArea: CGFloat = 50
-    var levelheight: CGFloat = 2
+    
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -38,14 +40,22 @@ class MainScene: SCNScene {
         setupBackgroundLayers()
         setupForegroundLevel()
         
-        Task(priority: .userInitiated) {
-            //            await firstUpdate()
-        }
-        
         player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red)
-        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .white)
+        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .blue)
+        
         rootNode.addChildNode(player1Tank)
         rootNode.addChildNode(player2Tank)
+        
+        
+        Task(priority: .userInitiated) {
+            await firstUpdate()
+        }
+    }
+    
+    // GRAPHICS // //////
+    @MainActor
+    func firstUpdate() {
+        tankMovement() // Call reanimate on the first graphics update frame
     }
     
     // CAMERA // ////////////
@@ -68,8 +78,8 @@ class MainScene: SCNScene {
         // TODO: Joe (PROBABLY)
         
         //Example starter code
-        let backgroundNode1 = createBackgroundNode(color: .blue, position: SCNVector3(0, 0, -50), size: CGSize(width: 40, height: 20))
-        let backgroundNode2 = createBackgroundNode(color: .green, position: SCNVector3(0, 0, -75), size: CGSize(width: 80, height: 50))
+        let backgroundNode1 = createBackgroundNode(color: .blue, position: SCNVector3(0, 0, -10), size: CGSize(width: 100, height: 20))
+        let backgroundNode2 = createBackgroundNode(color: .green, position: SCNVector3(0, 0, -20), size: CGSize(width: 120, height: 50))
         
         // Add the background nodes to the scene
         rootNode.addChildNode(backgroundNode1)
@@ -89,17 +99,79 @@ class MainScene: SCNScene {
         return backgroundNode
     }
     
+    
     func setupForegroundLevel() {
-               
-        let groundGeometry = SCNBox(width: levelSquaredArea, height: levelheight, length:  levelSquaredArea, chamferRadius: 0)
-        groundGeometry.firstMaterial?.diffuse.contents = UIColor.brown
+        let levelWidth: CGFloat = 100
+        let levelHeight: CGFloat = 20
         
-        let groundNode = SCNNode(geometry: groundGeometry)
-        groundNode.position = SCNVector3(0, groundPosition-(levelheight/2), -levelSquaredArea/2)
+        let levelNode = Level(levelWidth: levelWidth, levelHeight: levelHeight)
         
         
+        levelNode.position = SCNVector3(-(levelWidth/2), groundPosition - (levelNode.squareSize / 2), -levelNode.squareSize)
         
-        rootNode.addChildNode(groundNode)
+        levelNode.eulerAngles = SCNVector3(x: .pi/2 , y: 0, z: 0)
+        
+        
+        rootNode.addChildNode(levelNode)
     }
+    
+    // PLAYER CONTROL & SWITCHING // ///////////
+    
+    func switchActivePlayer() {
+        activePlayer = (activePlayer == 1) ? 2 : 1
+    }
+    
+    
+    func moveActivePlayerTankLeft() {
+        tankMovingLeft = true
+        tankMovingRight = false
+        movementPlayerSteps = 5
+        
+    }
+    
+    func moveActivePlayerTankRight() {
+        tankMovingRight = true
+        tankMovingLeft = false
+        movementPlayerSteps = 5
+    }
+    
+    func stopMovingTank() {
+        tankMovingLeft = false
+        tankMovingRight = false
+        
+    }
+    @MainActor
+    func tankMovement (){
+        if movementPlayerSteps > 0 {
+            
+            if activePlayer == 1 { // Player 1
+                if tankMovingLeft {
+                    player1Tank.moveLeft()
+                } else if tankMovingRight {
+                    player1Tank.moveRight()
+                }
+            } else if activePlayer == 2 { // Player 2
+                if tankMovingLeft {
+                    player2Tank.moveLeft()
+                } else if tankMovingRight {
+                    player2Tank.moveRight()
+                }
+            }
+            
+            movementPlayerSteps -= 1
+            if movementPlayerSteps == 0 {
+                stopMovingTank()
+            } else {
+
+            }
+        }
+        
+        Task { try! await Task.sleep(nanoseconds: 10000)
+            tankMovement()
+        }
+    }
+    
+    
+    
     
 }

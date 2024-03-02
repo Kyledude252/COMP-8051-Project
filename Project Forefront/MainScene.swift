@@ -180,6 +180,12 @@ class MainScene: SCNScene {
         }
     }
     
-    
+    func checkForReset() -> Bool {
+        if (player1Tank.getHealth() == 0 || player2Tank.getHealth() == 0) {
+            return true
+        } else {
+            return false
+        }
+    }
     
 }

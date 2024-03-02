@@ -40,4 +40,8 @@ class MainSceneViewModel: ObservableObject {
     func takeDamage() {
         scene.takeDamage()
     }
+    
+    func checkForReset() -> Bool{
+        return scene.checkForReset()
+    }
 }

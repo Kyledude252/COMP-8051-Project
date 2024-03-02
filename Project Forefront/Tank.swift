@@ -53,4 +53,8 @@ class Tank: SCNNode {
         let healthNumbers = SCNText(string: String(format: "%d/%d", health, maxHealth), extrusionDepth: 0.0)
         healthBar.geometry = healthNumbers
     }
+    
+    func getHealth() -> Int {
+        return health
+    }
 }

@@ -171,6 +171,14 @@ class MainScene: SCNScene {
         }
     }
     
+    // Temp function to debug damage
+    func takeDamage() {
+        if activePlayer == 1 {
+            player1Tank.decreaseHealth(damage: 101)
+        } else if activePlayer == 2 {
+            player2Tank.decreaseHealth(damage: 101)
+        }
+    }
     
     
     

@@ -100,6 +100,11 @@ struct ContentView: View {
                 Button(action: mainSceneViewModel.handleFire) {
                     Text("Fire!").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonToggle(which: 3))
+                
+                // Temporary button to debug damage
+                Button(action: mainSceneViewModel.takeDamage) {
+                    Text("Take Damage").frame(maxWidth: .infinity, minHeight: 80)
+                }
             }
         } else {
             StartScreenView {

@@ -30,7 +30,7 @@ class MainSceneViewModel: ObservableObject {
     }
     func handleAimRotateRight(){
         
-    }    
+    }
     func handleFire(){
         
     }
@@ -41,7 +41,13 @@ class MainSceneViewModel: ObservableObject {
         scene.takeDamage()
     }
     
-    func checkForReset() -> Bool{
-        return scene.checkForReset()
+    
+    // To be called from contentView only
+    func resetScene() {
+        DispatchQueue.main.async {
+            self.scene.cleanup()
+            self.scene = MainScene()
+        }
     }
+    
 }

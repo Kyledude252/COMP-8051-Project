@@ -14,6 +14,15 @@ class Level: SCNNode {
     let numCols: Int
     var cubeGrid: [[SCNNode?]]?
     
+    //Level gen values
+    let slopeAmplifier = 0.7
+    let slopeDampening = 1.8
+    let slopeDampeningThreshold = 0.2
+    let maxSlope = 2.0
+    var currentCol = -1
+    var slope = Double.random(in: -2...2)
+    var currentHeight = 0.0
+    
     // COLORS
     let lightBrown = UIColor(red: 210/255, green: 180/255, blue: 140/255, alpha: 1.0)
     let darkBrown = UIColor(red: 0.545, green: 0.271, blue: 0.075, alpha: 1.0)
@@ -23,9 +32,10 @@ class Level: SCNNode {
 
     
     init(levelWidth: CGFloat, levelHeight: CGFloat) {
-        self.numRows = Int(levelWidth / squareSize)
-        self.numCols = Int(levelHeight / squareSize)
-        self.cubeGrid = Array(repeating: Array(repeating: nil, count: numCols), count: numRows)
+        self.numCols = Int(levelWidth / squareSize)
+        self.numRows = Int(levelHeight / squareSize)
+        self.currentHeight = Double(numRows/2)
+        self.cubeGrid = Array(repeating: Array(repeating: nil, count: numRows), count: numCols)
         super.init()
         
         setupLevel()
@@ -50,24 +60,45 @@ class Level: SCNNode {
         topMaterial.diffuse.contents = grassGreen
         sideMaterial.diffuse.contents = slateBlueGray
 
-        for row in 0..<numRows {
-            for col in 0..<numCols {
+        for col in 0..<numCols {
+            for row in 0..<numRows {
 //                for row in stride(from: 0, to: numRows, by: 2) {
 //                    for col in stride(from: 0, to: numCols, by: 2) {
-                
-                let materials = [sideMaterial, sideMaterial, sideMaterial, sideMaterial, (col == 0) ? topMaterial : sideMaterial, sideMaterial]
-                
-                let squareNode = LevelSquare(squareSize: squareSize,
-                                             position: SCNVector3(CGFloat(row) * squareSize, -CGFloat(col) * squareSize, 0),
-                                             materials: materials)
-
-                squareNode.position = SCNVector3(CGFloat(row) * squareSize, -squareSize / 2, CGFloat(col) * squareSize)
-                
-                cubeGrid![row][col] = squareNode
-
-                addChildNode(squareNode)
+                if(levelGenerator(row: row, col: col)){
+                    let materials = [sideMaterial, sideMaterial, sideMaterial, sideMaterial, (row == 0) ? topMaterial : sideMaterial, sideMaterial]
+                    
+                    let squareNode = LevelSquare(squareSize: squareSize,
+                                                 position: SCNVector3(CGFloat(col) * squareSize, -CGFloat(row) * squareSize, 0),
+                                                 materials: materials)
+                    
+                    squareNode.position = SCNVector3(CGFloat(col) * squareSize, -squareSize / 2, CGFloat(row) * squareSize)
+                    
+                    cubeGrid![col][row] = squareNode
+                    
+                    addChildNode(squareNode)
+                }
             }
         }
+    }
+    
+    func levelGenerator(row: Int, col: Int) -> Bool{
+        if(col > currentCol){
+            currentCol = col
+            var slopeIncrease = slopeAmplifier*(1-(currentHeight/Double(numRows)))
+            var slopeDecrease = -slopeAmplifier*(1-((Double(numRows)-currentHeight)/Double(numRows)))
+            if(slope > slopeDampeningThreshold && currentHeight > Double(numRows)/2){
+                slopeIncrease /= slopeDampening
+            }
+            if(slope < -slopeDampeningThreshold && currentHeight < Double(numRows)/2){
+                slopeDecrease /= slopeDampening
+            }
+            slope += Double.random(in: slopeDecrease...slopeIncrease)
+            slope = min(max(slope, -maxSlope), maxSlope)
+            currentHeight += slope
+            currentHeight = min(max(currentHeight, 0), Double(numRows))
+        }
+        
+        return Double(row) > currentHeight
     }
     
     func deleteCubes(row: Int, col: Int, radius: Int){

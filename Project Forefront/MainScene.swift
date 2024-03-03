@@ -22,7 +22,7 @@ class MainScene: SCNScene {
     var movementPlayerSteps = 0
     var maxMovementPlayerSteps = 25 //TODO /TURNS
     
-    var groundPosition: CGFloat = -8
+    var groundPosition: CGFloat = 5
     
     
     required init?(coder aDecoder: NSCoder) {
@@ -102,7 +102,7 @@ class MainScene: SCNScene {
     
     func setupForegroundLevel() {
         let levelWidth: CGFloat = 100
-        let levelHeight: CGFloat = 20
+        let levelHeight: CGFloat = 30
         
         let levelNode = Level(levelWidth: levelWidth, levelHeight: levelHeight)
         

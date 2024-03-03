@@ -144,13 +144,13 @@ class MainScene: SCNScene {
     func tankMovement (){
         if movementPlayerSteps > 0 {
             
-            if activePlayer == 1 { // Player 1
+            if activePlayer == 1  && player1Tank.getHealth() > 0 { // Player 1
                 if tankMovingLeft {
                     player1Tank.moveLeft()
                 } else if tankMovingRight {
                     player1Tank.moveRight()
                 }
-            } else if activePlayer == 2 { // Player 2
+            } else if activePlayer == 2 && player2Tank.getHealth() > 0 { // Player 2
                 if tankMovingLeft {
                     player2Tank.moveLeft()
                 } else if tankMovingRight {
@@ -175,8 +175,10 @@ class MainScene: SCNScene {
     func takeDamage() {
         if activePlayer == 1 {
             player1Tank.decreaseHealth(damage: 101)
+            deadCondition()
         } else if activePlayer == 2 {
             player2Tank.decreaseHealth(damage: 101)
+            deadCondition()
         }
     }
     
@@ -185,6 +187,23 @@ class MainScene: SCNScene {
             return true
         } else {
             return false
+        }
+    }
+    
+    func deadCondition () {
+        let winNode = SCNNode()
+        var winText = SCNText()
+        if (player1Tank.getHealth() == 0) {
+            winText = SCNText(string: "Player 2 Wins!", extrusionDepth: 0.0)
+        } else if (player2Tank.getHealth() == 0) {
+            winText = SCNText(string: "Player 1 Wins!", extrusionDepth: 0.0)
+        }
+        winNode.geometry = winText
+        rootNode.addChildNode(winNode)
+        winNode.position = SCNVector3(-35, -6, 0)
+        
+        Task { try! await Task.sleep(nanoseconds: 5000000000)
+            await winNode.removeFromParentNode()
         }
     }
     

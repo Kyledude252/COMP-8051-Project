@@ -37,4 +37,11 @@ class MainSceneViewModel: ObservableObject {
     func handleAdjustPower(powerLevel: Double) {
         
     }
+    func takeDamage() {
+        scene.takeDamage()
+    }
+    
+    func checkForReset() -> Bool{
+        return scene.checkForReset()
+    }
 }

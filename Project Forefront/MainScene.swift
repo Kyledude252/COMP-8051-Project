@@ -123,8 +123,13 @@ class MainScene: SCNScene {
     //-------------------------------------------------------------------
     //function that's sent to coordinator
     @objc
-    func toggleFire(){
+    func toggleFire(isFireMode: Bool){
         print(player1Tank.position)
+        
+        if !isFireMode {
+            lineNode?.removeFromParentNode()
+            lineNode = nil
+        }
     }
     
     //Takes in a start and end point of 3d Vectors and draws a custom line based on vertices between points
@@ -138,12 +143,15 @@ class MainScene: SCNScene {
         //conversion required
         let indexData = Data(bytes: indices, count: indices.count * MemoryLayout<Int32>.size)
         //Set primative type to .line, connects points vertexSource with just one line line
+        //Ironically this means the line width requires other solutions to increase the thickness
         let element = SCNGeometryElement(data: indexData, primitiveType: .line, primitiveCount: 1, bytesPerIndex: MemoryLayout<Int32>.size)
         
         //Actually creating a line
         let lineGeometry = SCNGeometry(sources: [vertexSource], elements: [element])
         let lineNode = SCNNode(geometry: lineGeometry)
-        lineNode.geometry?.firstMaterial?.diffuse.contents = UIColor.green
+        
+        //this color can be changed later based on player color based on active player
+        lineNode.geometry?.firstMaterial?.diffuse.contents = UIColor.red
 
         // Remove the old line node
         self.lineNode?.removeFromParentNode()
@@ -153,5 +161,4 @@ class MainScene: SCNScene {
         self.rootNode.addChildNode(lineNode)
     }
     
- 
 }

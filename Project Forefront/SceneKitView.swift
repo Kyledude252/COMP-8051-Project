@@ -63,11 +63,11 @@ struct SceneKitView: UIViewRepresentable {
         //handles pan, gets location on screen (2D) and translate it to 3D
         @objc func handlePan(gesture: UIPanGestureRecognizer) {
             //set scene from MainScene
-            if let scnView = gesture.view as? SCNView, let scene = scnView.scene as? MainScene {
+            if let scnView = gesture.view as? SCNView, let scene = scnView.scene as? MainScene, toggleFireMode {
                 let location = gesture.location(in: scnView)
 
                 // Convert the 2D touch point to a 3D point in the scene
-                let projectedOrigin = scnView.projectPoint(SCNVector3(0, 0, 0))
+                let projectedOrigin = scnView.projectPoint(SCNVector3(0, 0, 3))
                 let touchPoint = scnView.unprojectPoint(SCNVector3(Float(location.x), Float(location.y), projectedOrigin.z))
 
                 // calling from MainScene
@@ -91,9 +91,11 @@ struct SceneKitView: UIViewRepresentable {
                 if button.title(for: .normal) == "Fire Mode" {
                     button.setTitle("Move Mode", for: .normal)
                     button.backgroundColor = .blue
+                    toggleFireMode = false
                 } else if button.title(for: .normal) == "Move Mode" {
                     button.setTitle("Fire Mode", for: .normal)
                     button.backgroundColor = .red
+                    toggleFireMode = true
                 }
             }
         }
@@ -101,7 +103,7 @@ struct SceneKitView: UIViewRepresentable {
         //Grabs function from main scene
         @objc func toggleFire() {
             fireModeText()
-            mainScene.toggleFire()
+            mainScene.toggleFire(isFireMode: toggleFireMode)
         }
     }
     

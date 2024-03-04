@@ -20,7 +20,8 @@ struct ContentView: View {
                         let cameraXOffset = Float(value.translation.width) * sensitivity
                         let cameraYOffset = -Float(value.translation.height) * sensitivity
                         
-                        mainSceneViewModel.scene.updateCameraPosition(cameraXOffset: cameraXOffset, cameraYOffset: cameraYOffset)
+                        //locking camera for now
+//                        mainSceneViewModel.scene.updateCameraPosition(cameraXOffset: cameraXOffset, cameraYOffset: cameraYOffset)
                     })
                     .edgesIgnoringSafeArea(.all)
             } else {

@@ -14,22 +14,25 @@ struct SceneKitView: UIViewRepresentable {
     //Reference main to grab functions
     let main: MainScene
     
-    
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView(frame: .zero)
         //scnView.scene = scene
         scnView.scene = main
+        
+        main.scnView = scnView
         //firing code ---
         //button position
         context.coordinator.setupFireButton(on: scnView)
-    
-                
+        context.coordinator.setupGestureRecognizers(on: scnView)
+        
         return scnView
     }
     
     func updateUIView(_ scnView: SCNView, context: Context) {
         // No updates needed
     }
+    
+    
     //Makes coordinator, sends an instance
     func makeCoordinator() -> Coordinator {
         Coordinator(self, mainScene: main)
@@ -50,6 +53,26 @@ struct SceneKitView: UIViewRepresentable {
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
             self.mainScene = mainScene
+        }
+        
+        //sets up gesture
+        func setupGestureRecognizers(on view: SCNView) {
+            let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
+            view.addGestureRecognizer(panGesture)
+        }
+        //handles pan, gets location on screen (2D) and translate it to 3D
+        @objc func handlePan(gesture: UIPanGestureRecognizer) {
+            //set scene from MainScene
+            if let scnView = gesture.view as? SCNView, let scene = scnView.scene as? MainScene {
+                let location = gesture.location(in: scnView)
+
+                // Convert the 2D touch point to a 3D point in the scene
+                let projectedOrigin = scnView.projectPoint(SCNVector3(0, 0, 0))
+                let touchPoint = scnView.unprojectPoint(SCNVector3(Float(location.x), Float(location.y), projectedOrigin.z))
+
+                // calling from MainScene
+                scene.createTrajectoryLine(from: scene.player1Tank.position, to: touchPoint)
+            }
         }
         
         // Creates fire button on screen view, so it remains on screen when panning
@@ -74,6 +97,7 @@ struct SceneKitView: UIViewRepresentable {
                 }
             }
         }
+        
         //Grabs function from main scene
         @objc func toggleFire() {
             fireModeText()
@@ -82,17 +106,4 @@ struct SceneKitView: UIViewRepresentable {
     }
     
 }
-//struct SceneKitView: UIViewRepresentable {
-//    func makeUIView(context: Context) -> SCNView {
-//        let sceneView = SCNView()
-//
-//        let scene = SCNScene(named: "MainScene.scn")!
-//        sceneView.scene = scene
-//
-//        return sceneView
-//    }
-//
-//    func updateUIView(_ uiView: SCNView, context: Context) {
-//        // Update your SceneKit view if needed
-//    }
-//}
+

@@ -12,7 +12,9 @@ import SceneKit
 class MainScene: SCNScene {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
-    var cameraYOffset: Float = 1
+    
+    var cameraYOffset: Float = -10 // set to make stage line straight, adjusting this later will probably be important
+    
     var cameraZOffset: Float = 25 // half of level width
     
     var player1Tank: Tank!
@@ -22,6 +24,15 @@ class MainScene: SCNScene {
     var groundPosition: CGFloat = -8
     var levelSquaredArea: CGFloat = 50
     var levelheight: CGFloat = 2
+    
+    //grab view
+    weak var scnView: SCNView?
+    // holds line for redrawing it
+    var lineNode: SCNNode?
+    // throttle drawing line to prevent lag fest
+    var isThrottling = false
+    let triggerPeriod = 0.1
+    
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -38,9 +49,6 @@ class MainScene: SCNScene {
         setupBackgroundLayers()
         setupForegroundLevel()
         
-        //firing---
-        
-        //------
         
         Task(priority: .userInitiated) {
             //            await firstUpdate()
@@ -50,6 +58,10 @@ class MainScene: SCNScene {
         player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .white)
         rootNode.addChildNode(player1Tank)
         rootNode.addChildNode(player2Tank)
+        
+        //firing---
+        //drawHorizontalLine()
+        //------
     }
     
     // CAMERA // ////////////
@@ -57,7 +69,8 @@ class MainScene: SCNScene {
         let camera = SCNCamera()
         cameraNode.camera = camera
         cameraNode.position = SCNVector3(cameraXOffset, cameraYOffset, cameraZOffset)
-        //        cameraNode.eulerAngles = SCNVector3(-Float.pi/4, Float.pi/4, 0)
+        //cameraNode.eulerAngles = SCNVector3(0, 0, 0)
+        
         rootNode.addChildNode(cameraNode)
     }
     
@@ -111,7 +124,34 @@ class MainScene: SCNScene {
     //function that's sent to coordinator
     @objc
     func toggleFire(){
-        print("ran")
+        print(player1Tank.position)
     }
     
+    //Takes in a start and end point of 3d Vectors and draws a custom line based on vertices between points
+    func createTrajectoryLine(from startPoint: SCNVector3, to endPoint: SCNVector3) {
+        //array containing start and end point of the line
+        let vertices: [SCNVector3] = [startPoint, endPoint]
+        //A container for vertex data forming part of the definition for a three-dimensional object, or geometry. <- check documentation
+        let vertexSource = SCNGeometrySource(vertices: vertices)
+        //defines 0 as start point and 1 as end point of hte line
+        let indices: [Int32] = [0, 1]
+        //conversion required
+        let indexData = Data(bytes: indices, count: indices.count * MemoryLayout<Int32>.size)
+        //Set primative type to .line, connects points vertexSource with just one line line
+        let element = SCNGeometryElement(data: indexData, primitiveType: .line, primitiveCount: 1, bytesPerIndex: MemoryLayout<Int32>.size)
+        
+        //Actually creating a line
+        let lineGeometry = SCNGeometry(sources: [vertexSource], elements: [element])
+        let lineNode = SCNNode(geometry: lineGeometry)
+        lineNode.geometry?.firstMaterial?.diffuse.contents = UIColor.green
+
+        // Remove the old line node
+        self.lineNode?.removeFromParentNode()
+        
+        // Set the new line node
+        self.lineNode = lineNode
+        self.rootNode.addChildNode(lineNode)
+    }
+    
+ 
 }

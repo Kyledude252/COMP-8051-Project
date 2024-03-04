@@ -28,9 +28,9 @@ struct ContentView: View {
     @State private var isMovingRight = false
     
     var body: some View {
-        let scene = mainSceneViewModel.scene
         if isGameStarted {
-            SceneKitView(scene: scene)
+
+            SceneKitView(scene: mainSceneViewModel.scene)
                 .gesture(DragGesture().onChanged { value in
                     let sensitivity: Float = 0.01 // Adjust the sensitivity of the drag
                     let cameraXOffset = Float(value.translation.width) * sensitivity
@@ -39,11 +39,20 @@ struct ContentView: View {
                     mainSceneViewModel.scene.updateCameraPosition(cameraXOffset: cameraXOffset, cameraYOffset: cameraYOffset)
                 })
                 .edgesIgnoringSafeArea(.all)
-                .onDisappear {
-                    isMovingLeft = false
-                    isMovingRight = false
+                .onAppear {
+                    mainSceneViewModel.scene.toggleGameStarted = {
+                        // reset - don't return
+
+                        mainSceneViewModel.resetScene()
+                        isGameStarted = false
+                        isMovingLeft = false
+                        isMovingRight = false
+                        sliderValue = 0.5
+                        
+                    }
                 }
-            HStack (spacing: 1) {
+            
+            HStack(spacing: 1) {
                 Button(action: {
                     if (!isMovingLeft) {
                         if (isMovingRight){
@@ -57,12 +66,10 @@ struct ContentView: View {
                             isMovingLeft = false
                         }
                     }
-                    
                 }) {
                     Text("Move Left").frame(maxWidth: .infinity, minHeight: 80)
                 }
                 .buttonStyle(ButtonTap())
-               
                 
                 Button(action: {
                     if (!isMovingRight) {
@@ -75,8 +82,8 @@ struct ContentView: View {
                         
                         // Reset flag - releasing button won't work
                         Timer.scheduledTimer(withTimeInterval: 0.00001, repeats: false) { _ in
-                                    isMovingRight = false
-                                }
+                            isMovingRight = false
+                        }
                     }
                 }) {
                     Text("Move Right").frame(maxWidth: .infinity, minHeight: 80)
@@ -86,17 +93,21 @@ struct ContentView: View {
                 Button(action: mainSceneViewModel.handleAimRotateLeft) {
                     Text("AimRotateLeft").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonToggle(which: 2))
+                
                 Button(action: mainSceneViewModel.handleAimRotateRight) {
                     Text("AimRotateRight").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonToggle(which: 3))
+                
                 VStack {
                     Text("POWER: \(sliderValue, specifier: "%.2f")")
                         .padding()
+                    
                     Slider(value: $sliderValue, in: 0...1, step: 0.1)
                         .onChange(of: sliderValue) { newValue in
                             mainSceneViewModel.handleAdjustPower(powerLevel: newValue)
                         }
                 }
+                
                 Button(action: mainSceneViewModel.handleFire) {
                     Text("Fire!").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonToggle(which: 3))
@@ -104,8 +115,12 @@ struct ContentView: View {
                 // Temporary button to debug damage
                 Button(action: mainSceneViewModel.takeDamage) {
                     Text("Take Damage").frame(maxWidth: .infinity, minHeight: 80)
-                }
+                }.buttonStyle(ButtonToggle(which: 3))
             }
+            .opacity(1)
+            .transition(.opacity)
+        
+            
         } else {
             StartScreenView {
                 isGameStarted = true

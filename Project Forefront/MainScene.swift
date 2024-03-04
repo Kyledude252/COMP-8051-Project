@@ -22,8 +22,10 @@ class MainScene: SCNScene {
     var movementPlayerSteps = 0
     var maxMovementPlayerSteps = 25 //TODO /TURNS
     
+    var toggleGameStarted: (() -> Void)? // callback for reset
+
     var groundPosition: CGFloat = 5
-    
+
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -51,6 +53,11 @@ class MainScene: SCNScene {
             await firstUpdate()
         }
     }
+    
+    func cleanup(){
+            rootNode.childNodes.forEach { $0.removeFromParentNode() }
+            NotificationCenter.default.removeObserver(self)
+        }
     
     // GRAPHICS // //////
     @MainActor
@@ -174,10 +181,10 @@ class MainScene: SCNScene {
     // Temp function to debug damage
     func takeDamage() {
         if activePlayer == 1 {
-            player1Tank.decreaseHealth(damage: 101)
+            player1Tank.decreaseHealth(damage: 10)
             deadCondition()
         } else if activePlayer == 2 {
-            player2Tank.decreaseHealth(damage: 101)
+            player2Tank.decreaseHealth(damage: 10)
             deadCondition()
         }
     }
@@ -193,9 +200,9 @@ class MainScene: SCNScene {
     func deadCondition () {
         let winNode = SCNNode()
         var winText = SCNText()
-        if (player1Tank.getHealth() == 0) {
+        if (player1Tank.getHealth() <= 0) {
             winText = SCNText(string: "Player 2 Wins!", extrusionDepth: 0.0)
-        } else if (player2Tank.getHealth() == 0) {
+        } else if (player2Tank.getHealth() <= 0) {
             winText = SCNText(string: "Player 1 Wins!", extrusionDepth: 0.0)
         }
         winNode.geometry = winText
@@ -204,7 +211,12 @@ class MainScene: SCNScene {
         
         Task { try! await Task.sleep(nanoseconds: 5000000000)
             await winNode.removeFromParentNode()
+            resetToStartScreen()
         }
     }
     
+    func resetToStartScreen() {
+        toggleGameStarted?()
+    }
+
 }

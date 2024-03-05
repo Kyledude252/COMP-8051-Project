@@ -30,8 +30,7 @@ struct ContentView: View {
     var body: some View {
 
         if isGameStarted {
-
-            SceneKitView(scene: mainSceneViewModel.scene)
+            SceneKitView(scene: mainSceneViewModel.scene, mainSceneViewModel: mainSceneViewModel)
                 .gesture(DragGesture().onChanged { value in
                     let sensitivity: Float = 0.01 // Adjust the sensitivity of the drag
                     let cameraXOffset = Float(value.translation.width) * sensitivity
@@ -43,7 +42,6 @@ struct ContentView: View {
                 .onAppear {
                     mainSceneViewModel.scene.toggleGameStarted = {
                         // reset - don't return
-
                         mainSceneViewModel.resetScene()
                         isGameStarted = false
                         isMovingLeft = false
@@ -92,28 +90,28 @@ struct ContentView: View {
                 }
                 .buttonStyle(ButtonTap())
                 
-                Button(action: mainSceneViewModel.handleAimRotateLeft) {
-                    Text("AimRotateLeft").frame(maxWidth: .infinity, minHeight: 80)
-                }.buttonStyle(ButtonToggle(which: 2))
-                
-                Button(action: mainSceneViewModel.handleAimRotateRight) {
-                    Text("AimRotateRight").frame(maxWidth: .infinity, minHeight: 80)
-                }.buttonStyle(ButtonToggle(which: 3))
-                
-                VStack {
-                    Text("POWER: \(sliderValue, specifier: "%.2f")")
-                        .padding()
-                    
-                    Slider(value: $sliderValue, in: 0...1, step: 0.1)
-                        .onChange(of: sliderValue) { newValue in
-                            mainSceneViewModel.handleAdjustPower(powerLevel: newValue)
-                        }
-                }
-                
-                Button(action: mainSceneViewModel.handleFire) {
-                    Text("Fire!").frame(maxWidth: .infinity, minHeight: 80)
-                }.buttonStyle(ButtonToggle(which: 3))
-                
+//                Button(action: mainSceneViewModel.handleAimRotateLeft) {
+//                    Text("AimRotateLeft").frame(maxWidth: .infinity, minHeight: 80)
+//                }.buttonStyle(ButtonToggle(which: 2))
+//                
+//                Button(action: mainSceneViewModel.handleAimRotateRight) {
+//                    Text("AimRotateRight").frame(maxWidth: .infinity, minHeight: 80)
+//                }.buttonStyle(ButtonToggle(which: 3))
+//                
+//                VStack {
+//                    Text("POWER: \(sliderValue, specifier: "%.2f")")
+//                        .padding()
+//                    
+//                    Slider(value: $sliderValue, in: 0...1, step: 0.1)
+//                        .onChange(of: sliderValue) { newValue in
+//                            mainSceneViewModel.handleAdjustPower(powerLevel: newValue)
+//                        }
+//                }
+//                
+//                Button(action: mainSceneViewModel.handleFire) {
+//                    Text("Fire!").frame(maxWidth: .infinity, minHeight: 80)
+//                }.buttonStyle(ButtonToggle(which: 3))
+//                
                 // Temporary button to debug damage
                 Button(action: mainSceneViewModel.takeDamage) {
                     Text("Take Damage").frame(maxWidth: .infinity, minHeight: 80)

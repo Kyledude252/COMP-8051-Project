@@ -116,6 +116,10 @@ struct ContentView: View {
                 Button(action: mainSceneViewModel.takeDamage) {
                     Text("Take Damage").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonToggle(which: 3))
+                
+                Button(action: mainSceneViewModel.scene.levelNode.randomExplosion) {
+                    Text("Random Explosion").frame(maxWidth: .infinity, minHeight: 80)
+                }.buttonStyle(ButtonTap())
             }
             .opacity(1)
             .transition(.opacity)

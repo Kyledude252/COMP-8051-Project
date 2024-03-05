@@ -21,11 +21,14 @@ class MainScene: SCNScene {
     var tankMovingRight = false
     var movementPlayerSteps = 0
     var maxMovementPlayerSteps = 25 //TODO /TURNS
+    let levelWidth: CGFloat = 100
+    let levelHeight: CGFloat = 30
     
     var toggleGameStarted: (() -> Void)? // callback for reset
 
     var groundPosition: CGFloat = 5
 
+    var levelNode = Level(levelWidth: 1, levelHeight: 1)
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -108,16 +111,13 @@ class MainScene: SCNScene {
     
     
     func setupForegroundLevel() {
-        let levelWidth: CGFloat = 100
-        let levelHeight: CGFloat = 30
-        
-        let levelNode = Level(levelWidth: levelWidth, levelHeight: levelHeight)
-        
+
+        levelNode.delete()
+        levelNode = Level(levelWidth: levelWidth, levelHeight: levelHeight)
         
         levelNode.position = SCNVector3(-(levelWidth/2), groundPosition - (levelNode.squareSize / 2), -levelNode.squareSize)
         
         levelNode.eulerAngles = SCNVector3(x: .pi/2 , y: 0, z: 0)
-        
         
         rootNode.addChildNode(levelNode)
     }

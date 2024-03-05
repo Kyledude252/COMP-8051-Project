@@ -112,13 +112,20 @@ class Level: SCNNode {
                 
                 let circleRadius = sqrt(pow(Double(x - row), 2) + pow(Double(y - col), 2))
                 if(circleRadius < Double(radius)){
-                    cubeGrid![x][y]?.removeFromParentNode()
+                    cubeGrid![y][x]?.removeFromParentNode()
                 }
 
             }
         }
 
-        cubeGrid![row][col]?.removeFromParentNode()
+        cubeGrid![col][row]?.removeFromParentNode()
+    }
+    
+    func randomExplosion() {
+        var size = Int.random(in: 3...20)
+        var posX = Int.random(in: 1...numRows-1)
+        var posY = Int.random(in: 1...numCols-1)
+        deleteCubes(row: posX, col: posY, radius: size)
     }
     
     func delete() {

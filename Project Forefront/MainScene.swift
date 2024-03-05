@@ -59,8 +59,8 @@ class MainScene: SCNScene {
         setupForegroundLevel()
         
 
-        player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red)
-        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .blue)
+        player1Tank = Tank(position: SCNVector3(-20, groundPosition-10, 0), color: .red)
+        player2Tank = Tank(position: SCNVector3(20, groundPosition-10, 0), color: .green)
         
         rootNode.addChildNode(player1Tank)
         rootNode.addChildNode(player2Tank)

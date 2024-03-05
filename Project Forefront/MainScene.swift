@@ -29,9 +29,11 @@ class MainScene: SCNScene {
     weak var scnView: SCNView?
     // holds line for redrawing it
     var lineNode: SCNNode?
-    // throttle drawing line to prevent lag fest
+    // throttle drawing line to prevent lag fest if needed, currently not used
     var isThrottling = false
     let triggerPeriod = 0.1
+    
+    var projectile: SCNNode?
     
     
     required init?(coder aDecoder: NSCoder) {
@@ -125,11 +127,11 @@ class MainScene: SCNScene {
     @objc
     func toggleFire(isFireMode: Bool){
         print(player1Tank.position)
-        
         if !isFireMode {
             lineNode?.removeFromParentNode()
             lineNode = nil
         }
+        //tank firing object funciton
     }
     
     //Takes in a start and end point of 3d Vectors and draws a custom line based on vertices between points
@@ -160,5 +162,34 @@ class MainScene: SCNScene {
         self.lineNode = lineNode
         self.rootNode.addChildNode(lineNode)
     }
+    //startPoint: Tank that is firing, endPoint: point of mouse 
+    //Later add collision detection
+    func createProjectile(from startPoint: SCNVector3) -> SCNNode {
+        //basic setup
+        let testProjectile = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 0)
+        let testMaterial = SCNMaterial()
+        testProjectile.materials = [testMaterial]
+        //add collision here later
+        //Change this color later to adjust for shot fired
+        testMaterial.diffuse.contents = UIColor.red
+        let projectileNode = SCNNode(geometry: testProjectile)
+        
+        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
+        projectileNode.physicsBody = physicsBody
+        
+        return projectileNode
+    }
     
+    func launchProjectile(from startPoint: SCNVector3, to endPoint: SCNVector3) {
+        projectile = createProjectile(from: startPoint)
+        projectile?.position = startPoint
+        //remove later
+        self.rootNode.addChildNode(projectile!)
+        //Get direction of vector
+        let direction = SCNVector3(endPoint.x - startPoint.x, endPoint.y - startPoint.y, 0)//endPoint.z - startPoint.z)
+        //Add scalar, edit as needed, maybe add to paramter later for different shots
+        let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
+        //Apply force to node
+        projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
+    }
 }

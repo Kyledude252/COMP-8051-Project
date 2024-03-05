@@ -63,15 +63,20 @@ struct SceneKitView: UIViewRepresentable {
         //handles pan, gets location on screen (2D) and translate it to 3D
         @objc func handlePan(gesture: UIPanGestureRecognizer) {
             //set scene from MainScene
+            //Does not allow gesture to handle if fire mode is not toggled
             if let scnView = gesture.view as? SCNView, let scene = scnView.scene as? MainScene, toggleFireMode {
                 let location = gesture.location(in: scnView)
-
                 // Convert the 2D touch point to a 3D point in the scene
-                let projectedOrigin = scnView.projectPoint(SCNVector3(0, 0, 3))
+                // The z value of this point and other points MUST match the same z plane as the tank otherwise
+                // later on detetion will not trigger
+                let projectedOrigin = scnView.projectPoint(SCNVector3(0, 0, 0))
                 let touchPoint = scnView.unprojectPoint(SCNVector3(Float(location.x), Float(location.y), projectedOrigin.z))
-
-                // calling from MainScene
-                scene.createTrajectoryLine(from: scene.player1Tank.position, to: touchPoint)
+                if gesture.state == .changed && toggleFireMode {
+                    // calling from MainScene
+                    scene.createTrajectoryLine(from: scene.player1Tank.position, to: touchPoint)
+                } else if gesture.state == .ended && toggleFireMode {
+                    scene.launchProjectile(from: scene.player1Tank.position, to: touchPoint)
+                }
             }
         }
         
@@ -91,11 +96,11 @@ struct SceneKitView: UIViewRepresentable {
                 if button.title(for: .normal) == "Fire Mode" {
                     button.setTitle("Move Mode", for: .normal)
                     button.backgroundColor = .blue
-                    toggleFireMode = false
+                    toggleFireMode = false //toggles fire mode off
                 } else if button.title(for: .normal) == "Move Mode" {
                     button.setTitle("Fire Mode", for: .normal)
                     button.backgroundColor = .red
-                    toggleFireMode = true
+                    toggleFireMode = true //toggles fire mode on
                 }
             }
         }
@@ -103,6 +108,7 @@ struct SceneKitView: UIViewRepresentable {
         //Grabs function from main scene
         @objc func toggleFire() {
             fireModeText()
+            //does not trigger toggle fire unless fireMode is on
             mainScene.toggleFire(isFireMode: toggleFireMode)
         }
     }

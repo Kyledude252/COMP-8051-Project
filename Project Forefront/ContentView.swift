@@ -28,6 +28,7 @@ struct ContentView: View {
     @State private var isMovingRight = false
     
     var body: some View {
+
         if isGameStarted {
 
             SceneKitView(scene: mainSceneViewModel.scene)
@@ -50,6 +51,7 @@ struct ContentView: View {
                         sliderValue = 0.5
                         
                     }
+
                 }
             
             HStack(spacing: 1) {

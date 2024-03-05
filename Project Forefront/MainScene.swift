@@ -12,8 +12,7 @@ import SceneKit
 class MainScene: SCNScene {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
-    var cameraYOffset: Float = 0
-    var cameraZOffset: Float = 35
+
     var player1Tank: Tank!
     var player2Tank: Tank!
     var activePlayer: Int = 1
@@ -30,6 +29,17 @@ class MainScene: SCNScene {
 
     var levelNode = Level(levelWidth: 1, levelHeight: 1)
     
+    //grab view
+    weak var scnView: SCNView?
+    // holds line for redrawing it
+    var lineNode: SCNNode?
+    // throttle drawing line to prevent lag fest if needed, currently not used
+    var isThrottling = false
+    let triggerPeriod = 0.1
+    
+    var projectile: SCNNode?
+    
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -38,13 +48,14 @@ class MainScene: SCNScene {
     // Initializer
     override init() {
         super.init()
-        
+            
         background.contents = UIColor.black
         
         setupCamera()
         setupBackgroundLayers()
         setupForegroundLevel()
         
+
         player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red)
         player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .blue)
         
@@ -73,7 +84,8 @@ class MainScene: SCNScene {
         let camera = SCNCamera()
         cameraNode.camera = camera
         cameraNode.position = SCNVector3(cameraXOffset, cameraYOffset, cameraZOffset)
-        //        cameraNode.eulerAngles = SCNVector3(-Float.pi/4, Float.pi/4, 0)
+        //cameraNode.eulerAngles = SCNVector3(0, 0, 0)
+        
         rootNode.addChildNode(cameraNode)
     }
     
@@ -172,7 +184,82 @@ class MainScene: SCNScene {
 
             }
         }
+
+      //May require closing bracket here
+    
+    //-------------------------------------------------------------------
+    //Firing Code
+    //-------------------------------------------------------------------
+    //function that's sent to coordinator
+    @objc
+    func toggleFire(isFireMode: Bool){
+        print(player1Tank.position)
+        if !isFireMode {
+            lineNode?.removeFromParentNode()
+            lineNode = nil
+        }
+        //tank firing object funciton
+    }
+    
+    //Takes in a start and end point of 3d Vectors and draws a custom line based on vertices between points
+    func createTrajectoryLine(from startPoint: SCNVector3, to endPoint: SCNVector3) {
+        //array containing start and end point of the line
+        let vertices: [SCNVector3] = [startPoint, endPoint]
+        //A container for vertex data forming part of the definition for a three-dimensional object, or geometry. <- check documentation
+        let vertexSource = SCNGeometrySource(vertices: vertices)
+        //defines 0 as start point and 1 as end point of hte line
+        let indices: [Int32] = [0, 1]
+        //conversion required
+        let indexData = Data(bytes: indices, count: indices.count * MemoryLayout<Int32>.size)
+        //Set primative type to .line, connects points vertexSource with just one line line
+        //Ironically this means the line width requires other solutions to increase the thickness
+        let element = SCNGeometryElement(data: indexData, primitiveType: .line, primitiveCount: 1, bytesPerIndex: MemoryLayout<Int32>.size)
         
+        //Actually creating a line
+        let lineGeometry = SCNGeometry(sources: [vertexSource], elements: [element])
+        let lineNode = SCNNode(geometry: lineGeometry)
+        
+        //this color can be changed later based on player color based on active player
+        lineNode.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+
+        // Remove the old line node
+        self.lineNode?.removeFromParentNode()
+        
+        // Set the new line node
+        self.lineNode = lineNode
+        self.rootNode.addChildNode(lineNode)
+    }
+    //startPoint: Tank that is firing, endPoint: point of mouse 
+    //Later add collision detection
+    func createProjectile(from startPoint: SCNVector3) -> SCNNode {
+        //basic setup
+        let testProjectile = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 0)
+        let testMaterial = SCNMaterial()
+        testProjectile.materials = [testMaterial]
+        //add collision here later
+        //Change this color later to adjust for shot fired
+        testMaterial.diffuse.contents = UIColor.red
+        let projectileNode = SCNNode(geometry: testProjectile)
+        
+        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
+        projectileNode.physicsBody = physicsBody
+        
+        return projectileNode
+    }
+    
+    func launchProjectile(from startPoint: SCNVector3, to endPoint: SCNVector3) {
+        projectile = createProjectile(from: startPoint)
+        projectile?.position = startPoint
+        //remove later
+        self.rootNode.addChildNode(projectile!)
+        //Get direction of vector
+        let direction = SCNVector3(endPoint.x - startPoint.x, endPoint.y - startPoint.y, 0)//endPoint.z - startPoint.z)
+        //Add scalar, edit as needed, maybe add to paramter later for different shots
+        let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
+        //Apply force to node
+        projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
+    }
+
         Task { try! await Task.sleep(nanoseconds: 10000)
             tankMovement()
         }

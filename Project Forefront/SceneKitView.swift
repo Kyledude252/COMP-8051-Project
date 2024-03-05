@@ -14,6 +14,7 @@ struct SceneKitView: UIViewRepresentable {
     //Reference main to grab functions
     let main: MainScene
     
+    
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView(frame: .zero)
         //scnView.scene = scene

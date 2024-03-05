@@ -12,7 +12,7 @@ import SceneKit
 struct SceneKitView: UIViewRepresentable {
     let scene: SCNScene
     //Reference main to grab functions
-    let main: MainScene
+    let main = MainScene()
     
     
     func makeUIView(context: Context) -> SCNView {

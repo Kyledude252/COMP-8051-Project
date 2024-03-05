@@ -12,13 +12,13 @@ import SceneKit
 struct SceneKitView: UIViewRepresentable {
     let scene: SCNScene
     //Reference main to grab functions
-    let main = MainScene()
+    let main: MainScene
     
     
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView(frame: .zero)
-        //scnView.scene = scene
-        scnView.scene = main
+        scnView.scene = scene
+        //main = scnView.scene
         
         main.scnView = scnView
         //firing code ---
@@ -66,6 +66,7 @@ struct SceneKitView: UIViewRepresentable {
             //set scene from MainScene
             //Does not allow gesture to handle if fire mode is not toggled
             if let scnView = gesture.view as? SCNView, let scene = scnView.scene as? MainScene, toggleFireMode {
+                // else if statement here to handle pan otherwise to handle moving camera
                 let location = gesture.location(in: scnView)
                 // Convert the 2D touch point to a 3D point in the scene
                 // The z value of this point and other points MUST match the same z plane as the tank otherwise

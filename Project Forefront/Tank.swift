@@ -45,6 +45,7 @@ class Tank: SCNNode {
     func decreaseHealth(damage: Int) {
         if (health - damage > 0) {
             health -= damage
+            print(health)
         } else {
             health = 0
         }

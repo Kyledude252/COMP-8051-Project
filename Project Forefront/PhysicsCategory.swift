@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+enum PhysicsCategory: Int {
+    case none = 0
+    case tank = 1
+    case levelSquare = 2
+    case projectile = 3
+}

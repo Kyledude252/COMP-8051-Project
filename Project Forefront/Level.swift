@@ -9,7 +9,7 @@ import Foundation
 import SceneKit
 
 class Level: SCNNode {
-    let squareSize: CGFloat = 0.25
+    let squareSize: CGFloat = 0.5
     let numRows: Int
     let numCols: Int
     var cubeGrid: [[SCNNode?]]?
@@ -131,4 +131,6 @@ class Level: SCNNode {
     func delete() {
         self.removeFromParentNode()
     }
+    
+    
 }

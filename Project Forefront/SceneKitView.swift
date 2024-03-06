@@ -73,9 +73,9 @@ struct SceneKitView: UIViewRepresentable {
                 let touchPoint = scnView.unprojectPoint(SCNVector3(Float(location.x), Float(location.y), projectedOrigin.z))
                 if gesture.state == .changed && fireModeOn {
                     // calling from MainScene
-                    scene.createTrajectoryLine(from: scene.player1Tank.position, to: touchPoint)
+                    scene.createTrajectoryLine(from: scene.getTankPosition()!, to: touchPoint)
                 } else if gesture.state == .ended && fireModeOn {
-                    scene.launchProjectile(from: scene.player1Tank.position, to: touchPoint)
+                    scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint)
                 }
             }
         }

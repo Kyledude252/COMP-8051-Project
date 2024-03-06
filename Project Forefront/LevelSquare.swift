@@ -21,6 +21,7 @@ class LevelSquare: SCNNode {
             self.position = position
             
         squareGeometry.materials = materials
+        setupPhysics()
     }
     
     required init?(coder: NSCoder) {
@@ -29,5 +30,13 @@ class LevelSquare: SCNNode {
     
     func delete() {
         removeFromParentNode()
+    }
+    
+    private func setupPhysics() {
+        let physicsBody = SCNPhysicsBody(type: .static, shape: nil)
+        physicsBody.isAffectedByGravity = false
+        self.physicsBody = physicsBody
+        physicsBody.mass = 0
+        physicsBody.friction = 10
     }
 }

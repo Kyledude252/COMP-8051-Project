@@ -12,9 +12,9 @@ import SceneKit
 class MainScene: SCNScene {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
-    var cameraYOffset: Float = -10
+    var cameraYOffset: Float = 0
     
-    var cameraZOffset: Float = 25
+    var cameraZOffset: Float = 35
 
     var player1Tank: Tank!
     var player2Tank: Tank!
@@ -197,36 +197,45 @@ class MainScene: SCNScene {
     func takeDamage() {
         if activePlayer == 1 {
             player1Tank.decreaseHealth(damage: 10)
-            deadCondition()
+            checkDeadCondition()
         } else if activePlayer == 2 {
             player2Tank.decreaseHealth(damage: 10)
-            deadCondition()
+            checkDeadCondition()
         }
     }
     
     func checkForReset() -> Bool {
-        if (player1Tank.getHealth() == 0 || player2Tank.getHealth() == 0) {
+        if (player1Tank.getHealth() <= 0 || player2Tank.getHealth() <= 0) {
             return true
         } else {
             return false
         }
     }
     
-    func deadCondition () {
-        let winNode = SCNNode()
-        var winText = SCNText()
+    func checkDeadCondition () {
+        // a little duplicated but fine for now
         if (player1Tank.getHealth() <= 0) {
+            let winNode = SCNNode()
+            var winText = SCNText()
             winText = SCNText(string: "Player 2 Wins!", extrusionDepth: 0.0)
+            winNode.geometry = winText
+            rootNode.addChildNode(winNode)
+            winNode.position = SCNVector3(-35, -6, 0)
+            Task { try! await Task.sleep(nanoseconds: 5000000000)
+                await winNode.removeFromParentNode()
+                resetToStartScreen()
+            }
         } else if (player2Tank.getHealth() <= 0) {
+            let winNode = SCNNode()
+            var winText = SCNText()
             winText = SCNText(string: "Player 1 Wins!", extrusionDepth: 0.0)
-        }
-        winNode.geometry = winText
-        rootNode.addChildNode(winNode)
-        winNode.position = SCNVector3(-35, -6, 0)
-        
-        Task { try! await Task.sleep(nanoseconds: 5000000000)
-            await winNode.removeFromParentNode()
-            resetToStartScreen()
+            winNode.geometry = winText
+            rootNode.addChildNode(winNode)
+            winNode.position = SCNVector3(-35, -6, 0)
+            Task { try! await Task.sleep(nanoseconds: 5000000000)
+                await winNode.removeFromParentNode()
+                resetToStartScreen()
+            }
         }
     }
     

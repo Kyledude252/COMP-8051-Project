@@ -11,16 +11,15 @@ import SceneKit
 
 struct SceneKitView: UIViewRepresentable {
     let scene: SCNScene
-    //Reference main to grab functions
-    let main = MainScene()
-    
-    
+    let mainSceneViewModel: MainSceneViewModel
+   
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView(frame: .zero)
         //scnView.scene = scene
-        scnView.scene = main
+        scnView.scene = scene
         
-        main.scnView = scnView
+        let main = mainSceneViewModel.scene
+         main.scnView = scnView
         //firing code ---
         //button position
         context.coordinator.setupFireButton(on: scnView)
@@ -36,7 +35,7 @@ struct SceneKitView: UIViewRepresentable {
     
     //Makes coordinator, sends an instance
     func makeCoordinator() -> Coordinator {
-        Coordinator(self, mainScene: main)
+        Coordinator(self, mainScene: mainSceneViewModel.scene)
     }
     //Coordinator class, needed to handle functions from MainScene
     //without coordinator functins from main scene would apply to another instance of main scene
@@ -49,7 +48,7 @@ struct SceneKitView: UIViewRepresentable {
         // button var for changing its properties
         var toggleButton: UIButton?
         //toggle boolean for fire mode on/off
-        var toggleFireMode = false;
+        var fireModeOn = false;
         
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
@@ -65,17 +64,17 @@ struct SceneKitView: UIViewRepresentable {
         @objc func handlePan(gesture: UIPanGestureRecognizer) {
             //set scene from MainScene
             //Does not allow gesture to handle if fire mode is not toggled
-            if let scnView = gesture.view as? SCNView, let scene = scnView.scene as? MainScene, toggleFireMode {
+            if let scnView = gesture.view as? SCNView, let scene = scnView.scene as? MainScene, fireModeOn {
                 let location = gesture.location(in: scnView)
                 // Convert the 2D touch point to a 3D point in the scene
                 // The z value of this point and other points MUST match the same z plane as the tank otherwise
                 // later on detetion will not trigger
                 let projectedOrigin = scnView.projectPoint(SCNVector3(0, 0, 0))
                 let touchPoint = scnView.unprojectPoint(SCNVector3(Float(location.x), Float(location.y), projectedOrigin.z))
-                if gesture.state == .changed && toggleFireMode {
+                if gesture.state == .changed && fireModeOn {
                     // calling from MainScene
                     scene.createTrajectoryLine(from: scene.player1Tank.position, to: touchPoint)
-                } else if gesture.state == .ended && toggleFireMode {
+                } else if gesture.state == .ended && fireModeOn {
                     scene.launchProjectile(from: scene.player1Tank.position, to: touchPoint)
                 }
             }
@@ -97,11 +96,11 @@ struct SceneKitView: UIViewRepresentable {
                 if button.title(for: .normal) == "Fire Mode" {
                     button.setTitle("Move Mode", for: .normal)
                     button.backgroundColor = .blue
-                    toggleFireMode = false //toggles fire mode off
+                    fireModeOn = false //toggles fire mode off
                 } else if button.title(for: .normal) == "Move Mode" {
                     button.setTitle("Fire Mode", for: .normal)
                     button.backgroundColor = .red
-                    toggleFireMode = true //toggles fire mode on
+                    fireModeOn = true //toggles fire mode on
                 }
             }
         }
@@ -110,7 +109,7 @@ struct SceneKitView: UIViewRepresentable {
         @objc func toggleFire() {
             fireModeText()
             //does not trigger toggle fire unless fireMode is on
-            mainScene.toggleFire(isFireMode: toggleFireMode)
+            mainScene.toggleFire(isFireMode: fireModeOn)
         }
     }
     

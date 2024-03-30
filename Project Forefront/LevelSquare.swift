@@ -35,6 +35,7 @@ class LevelSquare: SCNNode {
     private func setupPhysics() {
         let physicsBody = SCNPhysicsBody(type: .static, shape: nil)
         physicsBody.isAffectedByGravity = false
+        physicsBody.categoryBitMask = PhysicsCategory.levelSquare
         self.physicsBody = physicsBody
         physicsBody.mass = 0
         physicsBody.friction = 10

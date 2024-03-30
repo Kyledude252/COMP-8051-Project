@@ -9,7 +9,7 @@ import Foundation
 import SceneKit
 
 class LevelSquare: SCNNode {
-    
+    var size: Int = 1
     
     init(squareSize: CGFloat, position: SCNVector3, materials: [SCNMaterial]) {
             super.init()
@@ -35,6 +35,9 @@ class LevelSquare: SCNNode {
     private func setupPhysics() {
         let physicsBody = SCNPhysicsBody(type: .static, shape: nil)
         physicsBody.isAffectedByGravity = false
+        physicsBody.categoryBitMask = PhysicsCategory.levelSquare.rawValue
+        physicsBody.contactTestBitMask = PhysicsCategory.projectile.rawValue
+        physicsBody.contactTestBitMask = PhysicsCategory.tank.rawValue
         self.physicsBody = physicsBody
         physicsBody.mass = 0
         physicsBody.friction = 10

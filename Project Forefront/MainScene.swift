@@ -25,6 +25,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var maxMovementPlayerSteps = 25 //TODO /TURNS
     let levelWidth: CGFloat = 100
     let levelHeight: CGFloat = 30
+    var playerBoostCount = 5;
     
     var toggleGameStarted: (() -> Void)? // callback for reset
     
@@ -44,10 +45,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     var projectile: SCNNode?
     
-    var customPhysicsWorld: SCNPhysicsWorld!
-    
-    
-    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -66,12 +63,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         setupForegroundLevel()
         
         
-        player1Tank = Tank(position: SCNVector3(-20, groundPosition, -1), color: .red)
-        player2Tank = Tank(position: SCNVector3(20, groundPosition, -1.25), color: .white)
-        
+        player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red)
+        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .white)
         
         rootNode.addChildNode(player1Tank)
         rootNode.addChildNode(player2Tank)
+        
+        print("Position of player1Tank: \(player1Tank.position)")
+        print("Position of player1Tank: \(player2Tank.position)")
+
         
         
         Task(priority: .userInitiated) {
@@ -125,10 +125,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         // TODO: JOE
         //        geometry.firstMaterial?.diffuse.contents = UIImage(named: imageName)  //for real use with images
         
-        
         let backgroundNode = SCNNode(geometry: geometry)
         backgroundNode.position = position
-        
+
         return backgroundNode
     }
     
@@ -138,11 +137,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         levelNode.delete()
         levelNode = Level(levelWidth: levelWidth, levelHeight: levelHeight)
         
-        levelNode.position = SCNVector3(-(levelWidth/2), groundPosition - (levelNode.squareSize / 2), -levelNode.squareSize)
+        levelNode.position = SCNVector3(-(levelWidth/2), groundPosition - (levelNode.squareSize / 2), 0)
         
         levelNode.eulerAngles = SCNVector3(x: .pi/2 , y: 0, z: 0)
         
         rootNode.addChildNode(levelNode)
+        
+        print("Position of levelNode after rotation: \(levelNode.position)")
     }
     
     // PLAYER CONTROL & SWITCHING // ///////////
@@ -165,11 +166,26 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         movementPlayerSteps = 1
     }
     
+    @MainActor
+    func moveActivePlayerTankVertically(){
+        if activePlayer == 1  && player1Tank.getHealth() > 0 {
+            if(playerBoostCount > 0){
+                player1Tank.moveUpward()
+                playerBoostCount -= 1
+            }
+        }else{
+            if(playerBoostCount > 0){
+                player2Tank.moveUpward()
+                playerBoostCount -= 1
+            }
+        }
+    }
+    
     func stopMovingTank() {
         tankMovingLeft = false
         tankMovingRight = false
-        
     }
+    
     @MainActor
     func tankMovement (){
         if movementPlayerSteps > 0 {
@@ -207,15 +223,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
     
     // Temp function to debug damage
-    func takeDamage() {
-        if activePlayer == 1 {
-            player1Tank.decreaseHealth(damage: 10)
-            checkDeadCondition()
-        } else if activePlayer == 2 {
-            player2Tank.decreaseHealth(damage: 10)
-            checkDeadCondition()
-        }
-    }
+//    func takeDamage() {
+//        if activePlayer == 1 {
+//            player1Tank.decreaseHealth(damage: 10)
+//            checkDeadCondition()
+//        } else if activePlayer == 2 {
+//            player2Tank.decreaseHealth(damage: 10)
+//            checkDeadCondition()
+//        }
+//    }
     
     func checkForReset() -> Bool {
         if (player1Tank.getHealth() <= 0 || player2Tank.getHealth() <= 0) {
@@ -298,27 +314,11 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         self.lineNode = lineNode
         self.rootNode.addChildNode(lineNode)
     }
-    //startPoint: Tank that is firing, endPoint: point of mouse
-    //Later add collision detection
-    func createProjectile(from startPoint: SCNVector3) -> SCNNode {
-        //basic setup
-        let testProjectile = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 0)
-        let testMaterial = SCNMaterial()
-        testProjectile.materials = [testMaterial]
-        //add collision here later
-        //Change this color later to adjust for shot fired
-        testMaterial.diffuse.contents = UIColor.red
-        let projectileNode = SCNNode(geometry: testProjectile)
-        
-        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
-        projectileNode.physicsBody = physicsBody
-        
-        return projectileNode
-    }
+
     
     func launchProjectile(from startPoint: SCNVector3, to endPoint: SCNVector3) {
         if (!projectileShot){
-            projectile = createProjectile(from: startPoint)
+            projectile = Projectile(from: startPoint)
 
             //Get direction of vector
             let direction = SCNVector3(endPoint.x - startPoint.x, endPoint.y - startPoint.y, 0)//endPoint.z - startPoint.z)
@@ -339,6 +339,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
             
             projectileShot = true
+            playerBoostCount=10
             toggleTurns()
         }
     }
@@ -361,6 +362,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         } else {
             player = 1
         }
+        
+        
         
         // Declare countdownNode and winNode outside the closure
         var countdownNode: SCNNode?
@@ -403,30 +406,60 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
 
     // PHYSICS // /////////////
-//    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
-//        if let nodeA = contact.nodeA as? Tank, let nodeB = contact.nodeB as? Tank {
-//            // Collision between two tanks
-//            //handleTankCollision(tankA: nodeA, tankB: nodeB)
-//        } else if contact.nodeA.physicsBody?.categoryBitMask == PhysicsCategory.projectile.rawValue &&
-//                    contact.nodeB.physicsBody?.categoryBitMask == PhysicsCategory.tank.rawValue {
-//            
-//            // Collision between a projectile and a tank
-//            handleProjectileTankCollision(projectileNode: contact.nodeA, tankNode: contact.nodeB)
-//        } else if contact.nodeB.physicsBody?.categoryBitMask == PhysicsCategory.projectile.rawValue &&
-//                    contact.nodeA.physicsBody?.categoryBitMask == PhysicsCategory.tank.rawValue {
-//            
-//            // Collision between a projectile and a tank
-//            handleProjectileTankCollision(projectileNode: contact.nodeB, tankNode: contact.nodeA)
-//        }
-//    }
-//    
-//    func handleProjectileTankCollision(projectileNode: SCNNode, tankNode: SCNNode) {
-//        if let tank = tankNode as? Tank {
-//            tank.decreaseHealth(damage: 10)
-//        }
-//        projectileNode.removeFromParentNode()
-//    }
+    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
+        
+        guard let bodyA = contact.nodeA.physicsBody, let bodyB = contact.nodeB.physicsBody else {
+                return
+            }
+
+            let categoryMaskA = bodyA.categoryBitMask
+            let categoryMaskB = bodyB.categoryBitMask
+
+            if categoryMaskA != categoryMaskB {
+                if let tank = contact.nodeA as? Tank, let levelSquare = contact.nodeB as? LevelSquare {
+                    handleTankLevelSquareCollision(tank: tank, levelSquare: levelSquare)
+                } else if let tank = contact.nodeB as? Tank, let levelSquare = contact.nodeA as? LevelSquare {
+                    handleTankLevelSquareCollision(tank: tank, levelSquare: levelSquare)
+                }
+
+                if let tank = contact.nodeA as? Tank, let projectileNode = contact.nodeB as? Projectile {
+                    handleTankProjectileCollision(tank: tank, projectile: projectileNode)
+                } else if let tank = contact.nodeB as? Tank, let projectileNode = contact.nodeA as? Projectile {
+                    handleTankProjectileCollision(tank: tank, projectile: projectileNode)
+                }
+
+                if let levelSquare = contact.nodeA as? LevelSquare, let projectileNode = contact.nodeB as? Projectile {
+                    handleLevelSquareProjectileCollision(levelSquare: levelSquare, projectile: projectileNode)
+                } else if let levelSquare = contact.nodeB as? LevelSquare, let projectileNode = contact.nodeA as? Projectile {
+                    handleLevelSquareProjectileCollision(levelSquare: levelSquare, projectile: projectileNode)
+                }
+            
+        }
+    }
+    
+    var testTankIncrements: Int = 0
+    
+    func handleTankLevelSquareCollision(tank: Tank, levelSquare: LevelSquare) {
+        // Enum to represent collision sides
+       
+    }
+
+
+    func handleTankProjectileCollision(tank: Tank, projectile: Projectile) {
+        print("Tank collided with projectile")
+        // Implement collision handling logic here
+        tank.decreaseHealth(damage: 20);
+        checkDeadCondition()
+    }
+
+    func handleLevelSquareProjectileCollision(levelSquare: LevelSquare, projectile: Projectile) {
+        print("Level square collided with projectile")
+        // Implement collision handling logic here
+       
+    }
 }
+
+
 
 
 //extension MainScene: SCNPhysicsContactDelegate {

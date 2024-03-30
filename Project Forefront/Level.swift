@@ -101,36 +101,48 @@ class Level: SCNNode {
         return Double(row) > currentHeight
     }
     
-    func deleteCubes(row: Int, col: Int, radius: Int){
+    func deleteCubes(col: Int, row: Int, radius: Int){
         let rowMin = max(row - radius, 0)
-        let rowMax = min(row + radius, numRows - 1)
+        let rowMax = min(row + radius, numRows - 2)
         let colMin = max(col - radius, 0)
         let colMax = min(col + radius, numCols - 1)
         
-        for x in rowMin...rowMax{
-            for y in colMin...colMax{
-                
-                let circleRadius = sqrt(pow(Double(x - row), 2) + pow(Double(y - col), 2))
+        for x in colMin...colMax{
+            for y in rowMin...rowMax{
+                let circleRadius = sqrt(pow(Double(x - col), 2) + pow(Double(y - row), 2))
                 if(circleRadius < Double(radius)){
-                    cubeGrid![y][x]?.removeFromParentNode()
+                    cubeGrid![x][y]?.removeFromParentNode()
                 }
-
             }
         }
 
-        cubeGrid![col][row]?.removeFromParentNode()
+        //cubeGrid![col][row]?.removeFromParentNode()
     }
     
     func randomExplosion() {
-        var size = Int.random(in: 3...20)
-        var posX = Int.random(in: 1...numRows-1)
-        var posY = Int.random(in: 1...numCols-1)
-        deleteCubes(row: posX, col: posY, radius: size)
+        let size = Int.random(in: 3...20)
+        let posX = Int.random(in: 1...numRows-1)
+        let posY = Int.random(in: 1...numCols-1)
+        deleteCubes(col: posX, row: posY, radius: size)
     }
     
     func delete() {
         self.removeFromParentNode()
     }
     
+    func explode(pos: SCNVector3){
+        var x = 0
+        var y = numRows-1
+        var node = cubeGrid![x][y]
+        while((node?.position.x)! < pos.x){
+            x += 1
+            node = cubeGrid![x][y]
+        }
+        while(node != nil && (node?.position.z)! > pos.z){
+            y -= 1
+            node = cubeGrid![x][y]
+        }
+        deleteCubes(col: x, row: y, radius: 10)
+    }
     
 }

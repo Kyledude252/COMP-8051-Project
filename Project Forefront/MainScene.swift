@@ -311,6 +311,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         let projectileNode = SCNNode(geometry: testProjectile)
         
         let physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
+        physicsBody.categoryBitMask = PhysicsCategory.projectile
+        physicsBody.contactTestBitMask = PhysicsCategory.levelSquare
         projectileNode.physicsBody = physicsBody
         
         return projectileNode
@@ -340,6 +342,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             projectileShot = true
             toggleTurns()
+        }
+    }
+    
+    func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
+        let contactMask = contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask
+        if contactMask == (PhysicsCategory.levelSquare | PhysicsCategory.projectile) {
+            print(contact.nodeA.position)
+            contact.nodeB.removeFromParentNode()
+            levelNode.explode(pos: contact.nodeA.position)
         }
     }
     

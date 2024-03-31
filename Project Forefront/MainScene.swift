@@ -415,38 +415,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
 
     // PHYSICS // /////////////
-    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
-        
-        guard let bodyA = contact.nodeA.physicsBody, let bodyB = contact.nodeB.physicsBody else {
-                return
-            }
-
-            let categoryMaskA = bodyA.categoryBitMask
-            let categoryMaskB = bodyB.categoryBitMask
-
-            if categoryMaskA != categoryMaskB {
-                if let tank = contact.nodeA as? Tank, let levelSquare = contact.nodeB as? LevelSquare {
-                    handleTankLevelSquareCollision(tank: tank, levelSquare: levelSquare)
-                } else if let tank = contact.nodeB as? Tank, let levelSquare = contact.nodeA as? LevelSquare {
-                    handleTankLevelSquareCollision(tank: tank, levelSquare: levelSquare)
-                }
-
-                if let tank = contact.nodeA as? Tank, let projectileNode = contact.nodeB as? Projectile {
-                    handleTankProjectileCollision(tank: tank, projectile: projectileNode)
-                } else if let tank = contact.nodeB as? Tank, let projectileNode = contact.nodeA as? Projectile {
-                    handleTankProjectileCollision(tank: tank, projectile: projectileNode)
-                }
-
-                if let levelSquare = contact.nodeA as? LevelSquare, let projectileNode = contact.nodeB as? Projectile {
-                    handleLevelSquareProjectileCollision(levelSquare: levelSquare, projectile: projectileNode)
-                } else if let levelSquare = contact.nodeB as? LevelSquare, let projectileNode = contact.nodeA as? Projectile {
-                    handleLevelSquareProjectileCollision(levelSquare: levelSquare, projectile: projectileNode)
-                }
-            
-        }
-    }
-    
-    var testTankIncrements: Int = 0
     
     func handleTankLevelSquareCollision(tank: Tank, levelSquare: LevelSquare) {
         // Enum to represent collision sides

@@ -41,6 +41,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var lineNode: SCNNode?
     // throttle drawing line to prevent lag fest if needed, currently not used
     var isThrottling = false
+    // Store projeciles to remove alter
+    var projectileStore = SCNNode()
+    // Adjusts how far the tank can shoot
+    var maxProjectileX: Float = 15.0
+    var maxProjectileY: Float = 15.0
+    
     let triggerPeriod = 0.1
     
     var projectile: SCNNode?
@@ -61,6 +67,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         setupCamera()
         setupBackgroundLayers()
         setupForegroundLevel()
+        //Used for projectile removal
+        setupProjectileStore()
         
         
         player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red)
@@ -308,7 +316,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         lineNode.geometry?.firstMaterial?.diffuse.contents = UIColor.red
         
         // Remove the old line node
-        self.lineNode?.removeFromParentNode()
+        removeLine()
         
         // Set the new line node
         self.lineNode = lineNode
@@ -324,25 +332,64 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             let direction = SCNVector3(endPoint.x - startPoint.x, endPoint.y - startPoint.y, 0)//endPoint.z - startPoint.z)
             
             // need offset to avoid physics
-            let offsetFactor: Float = 1.01
-            let offsetStartingPosition = SCNVector3(startPoint.x + direction.x * offsetFactor, startPoint.y + direction.y * offsetFactor, startPoint.z + direction.z * offsetFactor)
-
+            // might need to edit this value later to change interactions
+            let offsetFactor: Float = 0.02
+            let offsetStartingPosition = SCNVector3(startPoint.x + (direction.x * offsetFactor), startPoint.y + (direction.y * offsetFactor), startPoint.z + direction.z * offsetFactor)
 
             projectile?.position = offsetStartingPosition
 
-            //remove later
-            self.rootNode.addChildNode(projectile!)
+            //Use to remove later
+            projectileStore.addChildNode(projectile!)
             
             //Add scalar, edit as needed, maybe add to paramter later for different shots
             let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
-            //Apply force to node
-            projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
+            
+            // used to dampen if going to far
+            var dampingFactor: Float = 0.1
+            
+            if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY) {
+                if (forceVector.x > forceVector.y) {
+                    dampingFactor = 15/forceVector.x
+                } else {
+                    dampingFactor = 15/forceVector.y
+                }
+            }
+            //Dampen if going to far
+            let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
+
+//            print("\nForce vector: \(forceVector) ")
+//            print("\ndampened: \(dampenedForceVector) ")
+            
+            //Apply force to node, dampen if too much force is applied
+            if(forceVector.x >= 15 || forceVector.y >= 15) {
+                projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
+            } else {
+                projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
+            }
+            
+            // Remove line again
+            removeLine()
             
             projectileShot = true
             playerBoostCount=10
             toggleTurns()
         }
     }
+    // removes line drawn for trajectory
+    func removeLine() {
+        self.lineNode?.removeFromParentNode()
+    }
+    // used to remove all projectile nodes later
+    func setupProjectileStore() {
+        self.rootNode.addChildNode(projectileStore)
+    }
+    // same as above
+    func deleteProjectiles() {
+        for childNode in projectileStore.childNodes {
+            childNode.removeFromParentNode()
+        }
+    }
+    ///------------------------------------------------
     
     func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
         let contactMask = contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask
@@ -372,7 +419,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             player = 1
         }
         
-        
+        //Stuf that happens
+        //deleteProjectiles()
         
         // Declare countdownNode and winNode outside the closure
         var countdownNode: SCNNode?

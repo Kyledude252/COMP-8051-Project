@@ -116,7 +116,7 @@ struct ContentView: View {
                 Button(action: mainSceneViewModel.rocketBoost) {
                     Text("Rocket\nBoost").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonTap())
-                
+                // Swapped to turn end
                 Button(action: mainSceneViewModel.scene.levelNode.randomExplosion) {
                     Text("Random Explosion").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonTap())

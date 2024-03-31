@@ -74,8 +74,18 @@ struct SceneKitView: UIViewRepresentable {
                 if gesture.state == .changed && fireModeOn {
                     // calling from MainScene
                     scene.createTrajectoryLine(from: scene.getTankPosition()!, to: touchPoint)
+                    
                 } else if gesture.state == .ended && fireModeOn {
                     scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint)
+                    //toggle fire mode upon firing
+                    toggleFire() // temp
+                    
+                    // disable fire mode <-- simply toggle this later
+                    toggleButton?.isEnabled = false
+                    
+                    // for testing ---------------------------------------
+                    // add this to a turn that can be timed
+                    mainScene.toggleTurns()
                 }
             }
         }

@@ -29,8 +29,7 @@ class Projectile: SCNNode {
         let physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
         self.physicsBody = physicsBody
         physicsBody.categoryBitMask = PhysicsCategory.projectile
-        physicsBody.contactTestBitMask = PhysicsCategory.levelSquare
-        physicsBody.contactTestBitMask = PhysicsCategory.tank
+        physicsBody.contactTestBitMask = PhysicsCategory.levelSquare | PhysicsCategory.tank
         
         // important!
         let zConstraint = SCNTransformConstraint.positionConstraint(inWorldSpace: true, with: { (node, position) -> SCNVector3 in
@@ -45,4 +44,5 @@ class Projectile: SCNNode {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
 }

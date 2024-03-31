@@ -103,9 +103,10 @@ class Tank: SCNNode {
         tankPhysicsBody?.restitution = 0 // bouncing
         tankPhysicsBody?.damping = 0 // sliding
         tankPhysicsBody?.allowsResting = true
-        tankPhysicsBody?.categoryBitMask = PhysicsCategory.tank.rawValue
-        tankPhysicsBody?.contactTestBitMask = PhysicsCategory.levelSquare.rawValue
-        tankPhysicsBody?.contactTestBitMask = PhysicsCategory.projectile.rawValue
+        tankPhysicsBody?.categoryBitMask = PhysicsCategory.tank
+        tankPhysicsBody?.contactTestBitMask = PhysicsCategory.levelSquare
+        tankPhysicsBody?.contactTestBitMask = PhysicsCategory.projectile
+
 
 
        

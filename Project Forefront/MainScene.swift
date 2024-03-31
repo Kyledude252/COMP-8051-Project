@@ -344,6 +344,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     
+    func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
+        let contactMask = contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask
+        if contactMask == (PhysicsCategory.levelSquare | PhysicsCategory.projectile) {
+            print(contact.nodeA.position)
+            contact.nodeB.removeFromParentNode()
+            levelNode.explode(pos: contact.nodeA.position)
+        }
+    }
+    
     func getTankPosition() -> SCNVector3? {
         if activePlayer == 1 {
             return player1Tank.presentation.position

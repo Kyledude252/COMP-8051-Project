@@ -15,13 +15,15 @@ struct SceneKitView: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> GameViewController {
         let vc = GameViewController(scene: scene)
-        let main = mainSceneViewModel.scene
-        main.scnView = vc.view as? SCNView
-        
-        //firing code ---
-        //button position
-        context.coordinator.setupFireButton(on: vc.view as! SCNView)
-        context.coordinator.setupGestureRecognizers(on: vc.view as! SCNView)
+        if (scene == mainSceneViewModel.scene) {
+            let main = mainSceneViewModel.scene
+            main.scnView = vc.view as? SCNView
+            
+            //firing code ---
+            //button position
+            context.coordinator.setupFireButton(on: vc.view as! SCNView)
+            context.coordinator.setupGestureRecognizers(on: vc.view as! SCNView)
+        }
         return vc
     }
     

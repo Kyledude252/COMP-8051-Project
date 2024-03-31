@@ -22,7 +22,9 @@ private var aimRotateRight = false
 
 struct ContentView: View {
     @StateObject var mainSceneViewModel = MainSceneViewModel()
+    @StateObject var statsSceneViewModel = StatsSceneViewModel()
     @State private var isGameStarted = false
+    @State private var statsScreenOpen = false
     @State private var sliderValue: Double = 0.5
     @State private var isMovingLeft = false
     @State private var isMovingRight = false
@@ -90,28 +92,28 @@ struct ContentView: View {
                 }
                 .buttonStyle(ButtonTap())
                 
-//                Button(action: mainSceneViewModel.handleAimRotateLeft) {
-//                    Text("AimRotateLeft").frame(maxWidth: .infinity, minHeight: 80)
-//                }.buttonStyle(ButtonToggle(which: 2))
-//                
-//                Button(action: mainSceneViewModel.handleAimRotateRight) {
-//                    Text("AimRotateRight").frame(maxWidth: .infinity, minHeight: 80)
-//                }.buttonStyle(ButtonToggle(which: 3))
-//                
-//                VStack {
-//                    Text("POWER: \(sliderValue, specifier: "%.2f")")
-//                        .padding()
-//                    
-//                    Slider(value: $sliderValue, in: 0...1, step: 0.1)
-//                        .onChange(of: sliderValue) { newValue in
-//                            mainSceneViewModel.handleAdjustPower(powerLevel: newValue)
-//                        }
-//                }
-//                
-//                Button(action: mainSceneViewModel.handleFire) {
-//                    Text("Fire!").frame(maxWidth: .infinity, minHeight: 80)
-//                }.buttonStyle(ButtonToggle(which: 3))
-//                
+                //                Button(action: mainSceneViewModel.handleAimRotateLeft) {
+                //                    Text("AimRotateLeft").frame(maxWidth: .infinity, minHeight: 80)
+                //                }.buttonStyle(ButtonToggle(which: 2))
+                //
+                //                Button(action: mainSceneViewModel.handleAimRotateRight) {
+                //                    Text("AimRotateRight").frame(maxWidth: .infinity, minHeight: 80)
+                //                }.buttonStyle(ButtonToggle(which: 3))
+                //
+                //                VStack {
+                //                    Text("POWER: \(sliderValue, specifier: "%.2f")")
+                //                        .padding()
+                //
+                //                    Slider(value: $sliderValue, in: 0...1, step: 0.1)
+                //                        .onChange(of: sliderValue) { newValue in
+                //                            mainSceneViewModel.handleAdjustPower(powerLevel: newValue)
+                //                        }
+                //                }
+                //
+                //                Button(action: mainSceneViewModel.handleFire) {
+                //                    Text("Fire!").frame(maxWidth: .infinity, minHeight: 80)
+                //                }.buttonStyle(ButtonToggle(which: 3))
+                //
                 // Temporary button to debug damage
                 Button(action: mainSceneViewModel.takeDamage) {
                     Text("Take Damage").frame(maxWidth: .infinity, minHeight: 80)
@@ -123,12 +125,25 @@ struct ContentView: View {
             }
             .opacity(1)
             .transition(.opacity)
-        
-            
-        } else {
-            StartScreenView {
-                isGameStarted = true
+        } else if (statsScreenOpen) {
+            SceneKitView(scene: statsSceneViewModel.scene, mainSceneViewModel: mainSceneViewModel)
+                .edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+            Button(action: {
+                statsScreenOpen = false
+            }) {
+                Text("Back to Main Menu")
             }
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.black)
+            .cornerRadius(10)
+            .padding()
+        } else {
+            StartScreenView(startAction: {
+                isGameStarted = true
+            }, statsAction: {
+                statsScreenOpen = true
+            })
             .edgesIgnoringSafeArea(.all)
         }
     }
@@ -144,8 +159,10 @@ struct ContentView: View {
 
 struct StartScreenView: View {
     var startAction: () -> Void
+    var statsAction: () -> Void
     
     @State private var isShowing = false
+    @StateObject private var statsSceneViewModel = StatsSceneViewModel()
     
     var body: some View {
         ZStack {
@@ -169,7 +186,6 @@ struct StartScreenView: View {
                     )
                     .opacity(isShowing ? 1 : 0)
                     .animation(.easeInOut(duration: 3))
-                
                 Button("Start Game") {
                     print("Start Game button pressed")
                     startAction()
@@ -182,10 +198,28 @@ struct StartScreenView: View {
                 .opacity(isShowing ? 1 : 0)
                 .animation(.easeInOut(duration: 5))
                 
+                Button("Show Stats") {
+                    statsSceneViewModel.updateStats()
+                    statsAction()
+                }
+                .foregroundColor(.white)
+                .padding()
+                .background(Color.black)
+                .cornerRadius(10)
+                .padding()
+                .opacity(isShowing ? 1: 0)
+                .animation(.easeInOut(duration: 5))
+                
                 Spacer()
             }
         }
         .onAppear {
+            if (UserDefaults.standard.value(forKey: "Player1Wins") == nil) {
+                UserDefaults.standard.set(0, forKey: "Player1Wins")
+            }
+            if (UserDefaults.standard.value(forKey: "Player2Wins") == nil) {
+                UserDefaults.standard.set(0, forKey: "Player2Wins")
+            }
             withAnimation {
                 self.isShowing = true
             }

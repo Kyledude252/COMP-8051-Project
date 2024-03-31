@@ -79,6 +79,13 @@ struct SceneKitView: UIViewRepresentable {
                     scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint)
                     //toggle fire mode upon firing
                     toggleFire() // temp
+                    
+                    // disable fire mode <-- simply toggle this later
+                    toggleButton?.isEnabled = false
+                    
+                    // for testing ---------------------------------------
+                    // add this to a turn that can be timed
+                    mainScene.toggleTurns()
                 }
             }
         }

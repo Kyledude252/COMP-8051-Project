@@ -372,7 +372,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             projectileShot = true
             playerBoostCount=10
-            toggleTurns()
         }
     }
     // removes line drawn for trajectory

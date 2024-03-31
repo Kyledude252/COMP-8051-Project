@@ -14,6 +14,8 @@ class Tank: SCNNode {
     var maxHealth: Int = 100
     var health: Int = 100
     let healthBar = SCNNode()
+    var size: Int = 1
+   
     
     private var tankPhysicsBody: SCNPhysicsBody?
     
@@ -23,7 +25,6 @@ class Tank: SCNNode {
         
         let tankGeometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 0)
         tankGeometry.firstMaterial?.diffuse.contents = color
-        
         self.geometry = tankGeometry
         self.position = position
         
@@ -41,14 +42,37 @@ class Tank: SCNNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func printNodeHierarchy(_ node: SCNNode, level: Int = 0) {
+        let indent = String(repeating: "  ", count: level)
+        print("\(indent)\(node.name ?? "Unnamed Node")")
+        for childNode in node.childNodes {
+            printNodeHierarchy(childNode, level: level + 1)
+        }
+    }
+    
     func moveLeft() {
-        let forceMagnitude: Float = 70
+        let forceMagnitude: Float = 60
         tankPhysicsBody?.applyForce(SCNVector3(-forceMagnitude, 0, 0), asImpulse: false)
     }
     
     func moveRight() {
-        let forceMagnitude: Float = 70
+        let forceMagnitude: Float = 60
         tankPhysicsBody?.applyForce(SCNVector3(forceMagnitude, 0, 0), asImpulse: false)
+    }
+    
+    func moveUpward() {
+        let forceMagnitude: Float = 300
+        tankPhysicsBody?.applyForce(SCNVector3(0, forceMagnitude, 0), asImpulse: false)
+    }
+    
+    
+    func loadModelFromFile(modelName:String, fileExtension:String) -> SCNReferenceNode {
+        
+        let url = Bundle.main.url(forResource: modelName, withExtension: fileExtension)
+        let refNode = SCNReferenceNode(url: url!)
+        refNode?.load()
+        refNode?.name = modelName
+        return refNode!
     }
     
     func decreaseHealth(damage: Int) {
@@ -68,7 +92,9 @@ class Tank: SCNNode {
     }
     
     func setupPhysics() {
-        tankPhysicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
+        
+       tankPhysicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
+
         tankPhysicsBody?.angularVelocityFactor = SCNVector3(0, 0, 0)
         tankPhysicsBody?.angularDamping = 0
         tankPhysicsBody?.friction = 0.01
@@ -78,26 +104,20 @@ class Tank: SCNNode {
         tankPhysicsBody?.damping = 0 // sliding
         tankPhysicsBody?.allowsResting = true
         tankPhysicsBody?.categoryBitMask = PhysicsCategory.tank
+        tankPhysicsBody?.contactTestBitMask = PhysicsCategory.levelSquare
+        tankPhysicsBody?.contactTestBitMask = PhysicsCategory.projectile
 
-//        tankPhysicsBody?.velocity.z = 0
 
-        let zConstraint = SCNTransformConstraint.positionConstraint(inWorldSpace: true, with: { (node, position) -> SCNVector3 in
-                return SCNVector3(position.x, position.y, 0) // Restricting z-position to 0
-            })
-            self.constraints = [zConstraint]
+
+       
+    applyZPositionConstraint(to: self)
 
         self.physicsBody = tankPhysicsBody
     }
-    
-    func handleCollision(with object: SCNPhysicsBody) {
-            // Check if the collision object is moving in the z-direction
-            let zVelocity = object.velocity.y
-            
-            // If the collision object has z-axis velocity, adjust the tank's velocity
-            if zVelocity != 0 {
-                // Set the tank's velocity along the z-axis to zero
-                tankPhysicsBody?.velocity.z = 0
-            }
+
+    func applyZPositionConstraint(to node: SCNNode) {
+        let zConstraint = SCNTransformConstraint.positionConstraint(inWorldSpace: true) { node, position in
+            return SCNVector3(position.x, position.y, 0) // Restricting z-position to 0
         }
-    
-}
+        node.constraints = [zConstraint]
+    }}

@@ -38,7 +38,12 @@ class MainSceneViewModel: ObservableObject {
         
     }
     func takeDamage() {
-        scene.takeDamage()
+//        scene.takeDamage()
+    }
+    
+    @MainActor func rocketBoost(){
+        scene.moveActivePlayerTankVertically()
+
     }
     
     

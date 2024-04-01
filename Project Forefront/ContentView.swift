@@ -26,6 +26,7 @@ struct ContentView: View {
     @State private var sliderValue: Double = 0.5
     @State private var isMovingLeft = false
     @State private var isMovingRight = false
+
     
     var body: some View {
 
@@ -116,9 +117,13 @@ struct ContentView: View {
                 Button(action: mainSceneViewModel.rocketBoost) {
                     Text("Rocket\nBoost").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonTap())
-                // Swapped to turn end
+                // remove later I guess
                 Button(action: mainSceneViewModel.scene.levelNode.randomExplosion) {
                     Text("Random Explosion").frame(maxWidth: .infinity, minHeight: 80)
+                }.buttonStyle(ButtonTap())
+                // turn end
+                Button(action: mainSceneViewModel.endTurn) {
+                    Text("TurnEnd").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonTap())
             }
             .opacity(1)

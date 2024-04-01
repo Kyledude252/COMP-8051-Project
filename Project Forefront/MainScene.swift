@@ -456,13 +456,29 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         
         let contactMask = contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask
         if contactMask == (PhysicsCategory.levelSquare | PhysicsCategory.projectile) {
-            
-            print(contact.nodeA.position)
-            contact.nodeB.removeFromParentNode()
-            levelNode.explode(pos: contact.nodeA.position)
+
             //Check flag for freezing timer
             projectileIsFlying = false
             semaphore.signal()
+
+
+            levelNode.explode(pos: contact.nodeA.position)
+            let dx1 = contact.contactPoint.x - player1Tank.position.x
+            let dz1 = contact.contactPoint.z - player1Tank.position.z
+            let dx2 = contact.contactPoint.x - player2Tank.position.x
+            let dz2 = contact.contactPoint.z - player2Tank.position.z
+            if(sqrt(dx1*dx1+dz1+dz1) < 5 && contact.nodeB.parent != nil){
+                //NOTE distance is set to 5 to line up with explosion side of 10, since the level blocks are 0.5 scale. If we have different explosion sizes or change the scale of the cubes the distance here should be explosionSize*LevelCubeScale. Something to change later when we make different explosives with different sizes and figure out that system.
+                player1Tank.decreaseHealth(damage: 10)
+            }
+            if(sqrt(dx2*dx2+dz2+dz2) < 5 && contact.nodeB.parent != nil){
+                player2Tank.decreaseHealth(damage: 10)
+            }
+            contact.nodeB.removeFromParentNode()
+            
+        }else if contactMask == (PhysicsCategory.tank | PhysicsCategory.projectile){
+            //Tank specific collision if we do that
+
         }
 
     }

@@ -11,6 +11,8 @@
 		3650F06F2B6AEE780076D527 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3650F06E2B6AEE780076D527 /* ContentView.swift */; };
 		3650F0712B6AEE7A0076D527 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3650F0702B6AEE7A0076D527 /* Assets.xcassets */; };
 		3650F0742B6AEE7A0076D527 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3650F0732B6AEE7A0076D527 /* Preview Assets.xcassets */; };
+		36D6384F2BBA697300B8913C /* BGSong.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 36D6384E2BBA697300B8913C /* BGSong.mp3 */; };
+		36D638522BBA6AC400B8913C /* explosion.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 36D638512BBA6AC400B8913C /* explosion.mp3 */; };
 		CECB836F2B7C279C00BF993D /* SceneKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECB836E2B7C279C00BF993D /* SceneKitView.swift */; };
 		CECB83712B7C28DA00BF993D /* MainScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECB83702B7C28DA00BF993D /* MainScene.swift */; };
 		CECB83732B7C3B3900BF993D /* MainSceneViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECB83722B7C3B3900BF993D /* MainSceneViewModel.swift */; };
@@ -28,6 +30,8 @@
 		3650F06E2B6AEE780076D527 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3650F0702B6AEE7A0076D527 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3650F0732B6AEE7A0076D527 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		36D6384E2BBA697300B8913C /* BGSong.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = BGSong.mp3; sourceTree = "<group>"; };
+		36D638512BBA6AC400B8913C /* explosion.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = explosion.mp3; sourceTree = "<group>"; };
 		CECB836E2B7C279C00BF993D /* SceneKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneKitView.swift; sourceTree = "<group>"; };
 		CECB83702B7C28DA00BF993D /* MainScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScene.swift; sourceTree = "<group>"; };
 		CECB83722B7C3B3900BF993D /* MainSceneViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSceneViewModel.swift; sourceTree = "<group>"; };
@@ -81,6 +85,7 @@
 				CECC0F382B980B4D00EA0F02 /* PhysicsCategory.swift */,
 				CEE97D0F2B8FD052002F0962 /* LevelSquare.swift */,
 				3650F0702B6AEE7A0076D527 /* Assets.xcassets */,
+				36D638502BBA699700B8913C /* Audio */,
 				3650F0722B6AEE7A0076D527 /* Preview Content */,
 			);
 			path = "Project Forefront";
@@ -92,6 +97,15 @@
 				3650F0732B6AEE7A0076D527 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		36D638502BBA699700B8913C /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				36D6384E2BBA697300B8913C /* BGSong.mp3 */,
+				36D638512BBA6AC400B8913C /* explosion.mp3 */,
+			);
+			path = Audio;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -152,8 +166,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36D638522BBA6AC400B8913C /* explosion.mp3 in Resources */,
 				3650F0742B6AEE7A0076D527 /* Preview Assets.xcassets in Resources */,
 				CED7B1EB2BB8A98900E71297 /* 14077_WWII_Tank_Germany_Panzer_III_v1_L2.obj in Resources */,
+				36D6384F2BBA697300B8913C /* BGSong.mp3 in Resources */,
 				3650F0712B6AEE7A0076D527 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -309,7 +325,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Project Forefront/Preview Content\"";
-				DEVELOPMENT_TEAM = NYCU259DW4;
+				DEVELOPMENT_TEAM = 46H4N5ZC8L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -321,7 +337,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = comp8051.Project;
+				PRODUCT_BUNDLE_IDENTIFIER = "comp8051.Assign2-Group3";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -339,7 +355,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Project Forefront/Preview Content\"";
-				DEVELOPMENT_TEAM = NYCU259DW4;
+				DEVELOPMENT_TEAM = 46H4N5ZC8L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -351,7 +367,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = comp8051.Project;
+				PRODUCT_BUNDLE_IDENTIFIER = "comp8051.Assign2-Group3";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;

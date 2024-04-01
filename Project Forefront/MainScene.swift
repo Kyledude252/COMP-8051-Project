@@ -8,7 +8,6 @@
 import Foundation
 import SceneKit
 
-
 class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
@@ -95,6 +94,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     // GRAPHICS // //////
     @MainActor
     func firstUpdate() {
+        setupAudio()
         tankMovement() // Call reanimate on the first graphics update frame
     }
     
@@ -110,6 +110,23 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     func updateCameraPosition(cameraXOffset: Float, cameraYOffset: Float) {
         cameraNode.position = SCNVector3(cameraXOffset, cameraYOffset, cameraZOffset)
+    }
+    
+    func setupAudio(){
+        
+        guard let BGSource = SCNAudioSource(named: "BGSong.mp3") else {
+                print("Failed to load BGSong.mp3")
+                return
+            }
+        
+        //let BGSource = SCNAudioSource(named: "BGSong.mp3")!
+        BGSource.loops = true
+        BGSource.volume = 1.0
+        BGSource.isPositional = false
+        BGSource.load()
+        let BGSong = SCNAudioPlayer(source: BGSource)
+        rootNode.addAudioPlayer(BGSong)
+        print("ADDED SONG")
     }
     
     
@@ -407,6 +424,19 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 player2Tank.decreaseHealth(damage: 10)
             }
             contact.nodeB.removeFromParentNode()
+            
+            guard let explodeSource = SCNAudioSource(named: "explosion.mp3") else {
+                    print("Failed to load explosion.mp3")
+                    return
+                }
+            
+            explodeSource.loops = false
+            explodeSource.volume = 1.0
+            explodeSource.isPositional = false
+            explodeSource.load()
+            let explodeFX = SCNAudioPlayer(source: explodeSource)
+            rootNode.addAudioPlayer(explodeFX)
+            print("ADDED EXPLOSION")
             
         }else if contactMask == (PhysicsCategory.tank | PhysicsCategory.projectile){
             //Tank specific collision if we do that

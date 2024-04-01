@@ -24,60 +24,21 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "1FF1D3F7-07DE-4112-A4B4-680CDDD7F7FC"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Project Forefront/MainScene.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
+<<<<<<< Updated upstream
             startingLineNumber = "429"
             endingLineNumber = "429"
-            landmarkName = "MainScene"
-            landmarkType = "3">
-            <Locations>
-               <Location
-                  uuid = "1FF1D3F7-07DE-4112-A4B4-680CDDD7F7FC - 77e275e76f2555ff"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Project_Forefront.MainScene.physicsWorld(_: __C.SCNPhysicsWorld, didBegin: __C.SCNPhysicsContact) -&gt; ()"
-                  moduleName = "Project Forefront"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Volumes/comp8051/comp8051-Advanced_Games_Architecture/workspace/COMP-8051-Project/Project%20Forefront/MainScene.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "431"
-                  endingLineNumber = "431">
-               </Location>
-               <Location
-                  uuid = "1FF1D3F7-07DE-4112-A4B4-680CDDD7F7FC - 77e275e76f2555ff"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Project_Forefront.MainScene.physicsWorld(_: __C.SCNPhysicsWorld, didBegin: __C.SCNPhysicsContact) -&gt; ()"
-                  moduleName = "Project Forefront"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Volumes/comp8051/comp8051-Advanced_Games_Architecture/workspace/COMP-8051-Project/Project%20Forefront/MainScene.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "431"
-                  endingLineNumber = "431">
-               </Location>
-               <Location
-                  uuid = "1FF1D3F7-07DE-4112-A4B4-680CDDD7F7FC - 1241bc409695c4e5"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Project_Forefront.MainScene.handleTankProjectileCollision(tank: Project_Forefront.Tank, projectile: Project_Forefront.Projectile) -&gt; ()"
-                  moduleName = "Project Forefront"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Volumes/comp8051/comp8051-Advanced_Games_Architecture/workspace/COMP-8051-Project/Project%20Forefront/MainScene.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "429"
-                  endingLineNumber = "429">
-               </Location>
-            </Locations>
+=======
+            startingLineNumber = "430"
+            endingLineNumber = "430"
+>>>>>>> Stashed changes
+            landmarkName = "toggleTurns()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

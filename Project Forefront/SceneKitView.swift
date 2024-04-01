@@ -81,7 +81,6 @@ struct SceneKitView: UIViewRepresentable {
                     
                 } else if gesture.state == .ended && fireModeOn {
                     scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint)
-
                 }
             }
         }

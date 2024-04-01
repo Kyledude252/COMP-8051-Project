@@ -45,7 +45,10 @@ class MainSceneViewModel: ObservableObject {
         scene.moveActivePlayerTankVertically()
 
     }
-    
+    //Use this to call toggle turns, basically ends turn immediatley in gameplay
+    @MainActor func endTurn() {
+        scene.turnEndedPressed()
+    }
     
     // To be called from contentView only
     func resetScene() {

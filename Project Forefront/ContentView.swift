@@ -22,7 +22,9 @@ private var aimRotateRight = false
 
 struct ContentView: View {
     @StateObject var mainSceneViewModel = MainSceneViewModel()
+    @StateObject var statsSceneViewModel = StatsSceneViewModel()
     @State private var isGameStarted = false
+    @State private var statsScreenOpen = false
     @State private var sliderValue: Double = 0.5
     @State private var isMovingLeft = false
     @State private var isMovingRight = false
@@ -157,12 +159,32 @@ struct ContentView: View {
                     Text("TurnEnd").frame(maxWidth: .infinity, minHeight: 80)
                 }.buttonStyle(ButtonTap())
             }
+
+            .opacity(1)
+            .transition(.opacity)
+        } else if (statsScreenOpen) {
+            SceneKitView(scene: statsSceneViewModel.scene, mainSceneViewModel: mainSceneViewModel)
+                .edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
+            Button(action: {
+                statsScreenOpen = false
+            }) {
+                Text("Back to Main Menu")
+            }
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.black)
+            .cornerRadius(10)
+            .padding()
             .edgesIgnoringSafeArea(.all)
             
+
         } else {
-            StartScreenView {
+            StartScreenView(startAction: {
                 isGameStarted = true
-            }
+            }, statsAction: {
+                statsSceneViewModel.updateStats()
+                statsScreenOpen = true
+            })
             .edgesIgnoringSafeArea(.all)
         }
     }
@@ -178,8 +200,10 @@ struct ContentView: View {
 
 struct StartScreenView: View {
     var startAction: () -> Void
+    var statsAction: () -> Void
     
     @State private var isShowing = false
+    @StateObject private var statsSceneViewModel = StatsSceneViewModel()
     
     var body: some View {
         ZStack {
@@ -203,7 +227,6 @@ struct StartScreenView: View {
                     )
                     .opacity(isShowing ? 1 : 0)
                     .animation(.easeInOut(duration: 3))
-                
                 Button("Start Game") {
                     print("Start Game button pressed")
                     startAction()
@@ -216,10 +239,27 @@ struct StartScreenView: View {
                 .opacity(isShowing ? 1 : 0)
                 .animation(.easeInOut(duration: 5))
                 
+                Button("Show Stats") {
+                    statsAction()
+                }
+                .foregroundColor(.white)
+                .padding()
+                .background(Color.black)
+                .cornerRadius(10)
+                .padding()
+                .opacity(isShowing ? 1: 0)
+                .animation(.easeInOut(duration: 5))
+                
                 Spacer()
             }
         }
         .onAppear {
+            if (UserDefaults.standard.value(forKey: "Player1Wins") == nil) {
+                UserDefaults.standard.set(0, forKey: "Player1Wins")
+            }
+            if (UserDefaults.standard.value(forKey: "Player2Wins") == nil) {
+                UserDefaults.standard.set(0, forKey: "Player2Wins")
+            }
             withAnimation {
                 self.isShowing = true
             }

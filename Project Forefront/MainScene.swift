@@ -289,6 +289,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         if (player1Tank.getHealth() <= 0) {
             let winNode = SCNNode()
             var winText = SCNText()
+            var player2Wins = UserDefaults.standard.integer(forKey: "Player2Wins")
+            player2Wins += 1
+            UserDefaults.standard.set(player2Wins, forKey: "Player2Wins")
+
             winText = SCNText(string: "Player 2 Wins!", extrusionDepth: 0.0)
             winText.firstMaterial = textMaterial
             winNode.geometry = winText
@@ -301,6 +305,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         } else if (player2Tank.getHealth() <= 0) {
             let winNode = SCNNode()
             var winText = SCNText()
+            var player1Wins = UserDefaults.standard.integer(forKey: "Player1Wins")
+            player1Wins += 1
+            UserDefaults.standard.setValue(player1Wins, forKey: "Player1Wins")
             winText = SCNText(string: "Player 1 Wins!", extrusionDepth: 0.0)
             winText.firstMaterial = textMaterial
             winNode.geometry = winText

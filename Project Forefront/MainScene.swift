@@ -369,7 +369,19 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             // might need to edit this value later to change interactions
             let offsetFactor: Float = 0.02
             let offsetStartingPosition = SCNVector3(startPoint.x + (direction.x * offsetFactor), startPoint.y + (direction.y * offsetFactor), startPoint.z + direction.z * offsetFactor)
-
+            
+//            let lightOffsetFactor: Float = 0.01
+//            let lightOffsetPos = SCNVector3(startPoint.x + (direction.x * lightOffsetFactor), startPoint.y + (direction.y * lightOffsetFactor), startPoint.z + direction.z * lightOffsetFactor)
+            
+            let shotLightNode = SCNNode()
+            shotLightNode.position = startPoint
+            shotLightNode.light = SCNLight()
+            shotLightNode.light?.type = SCNLight.LightType.spot
+            shotLightNode.light?.intensity = 2000
+            rootNode.addChildNode(shotLightNode)
+            
+            shotLightNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.1), SCNAction.removeFromParentNode()]))
+            
             projectile?.position = offsetStartingPosition
 
             //Use to remove later

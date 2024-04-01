@@ -15,8 +15,6 @@ class StatsScene : SCNScene {
     var cameraZOffset: Float = 30
     var player1Wins = UserDefaults.standard.integer(forKey: "Player1Wins")
     var player2Wins = UserDefaults.standard.integer(forKey: "Player2Wins")
-    var player1Text = SCNText()
-    var player2Text = SCNText()
     let player1Stats = SCNNode()
     let player2Stats = SCNNode()
     
@@ -40,8 +38,8 @@ class StatsScene : SCNScene {
     }
     
     func setupStats() {
-        player1Text = SCNText(string: String(format: "Player 1 Wins: %d", player1Wins), extrusionDepth: 0.0)
-        player2Text = SCNText(string: String(format: "Player 2 Wins: %d", player2Wins), extrusionDepth: 0.0)
+        let player1Text = SCNText(string: String(format: "Player 1 Wins: %d", player1Wins), extrusionDepth: 0.0)
+        let player2Text = SCNText(string: String(format: "Player 2 Wins: %d", player2Wins), extrusionDepth: 0.0)
         player1Stats.geometry = player1Text
         player2Stats.geometry = player2Text
         player1Stats.scale = SCNVector3(0.5, 0.5, 0.5)
@@ -58,5 +56,11 @@ class StatsScene : SCNScene {
     func updateStats() {
         player1Wins = UserDefaults.standard.integer(forKey: "Player1Wins")
         player2Wins = UserDefaults.standard.integer(forKey: "Player2Wins")
+        if let player1Text = player1Stats.geometry as? SCNText {
+            player1Text.string = String(format: "Player 1 Wins: %d", player1Wins)
+        }
+        if let player2Text = player2Stats.geometry as? SCNText {
+            player2Text.string = String(format: "Player 2 Wins: %d", player2Wins)
+        }
     }
 }

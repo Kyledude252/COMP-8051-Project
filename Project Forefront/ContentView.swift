@@ -142,6 +142,7 @@ struct ContentView: View {
             StartScreenView(startAction: {
                 isGameStarted = true
             }, statsAction: {
+                statsSceneViewModel.updateStats()
                 statsScreenOpen = true
             })
             .edgesIgnoringSafeArea(.all)
@@ -199,7 +200,6 @@ struct StartScreenView: View {
                 .animation(.easeInOut(duration: 5))
                 
                 Button("Show Stats") {
-                    statsSceneViewModel.updateStats()
                     statsAction()
                 }
                 .foregroundColor(.white)

@@ -52,6 +52,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var ammoNode: SCNNode?
     // used to check if player can move (is in move mode)
     var canMove: Bool = true
+    // used for freezing movement during turn transition
+    var moveFlag: Bool = true
     // used to check if turnEnd button is clicked
     var turnEnded: Bool = false
     // turn time
@@ -60,6 +62,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var projectileIsFlying: Bool = false
     // Semaphore for freezing projectile
     let semaphore = DispatchSemaphore(value: 0)
+    // shot type use for semaphore, to stop waiting if firing laser
+    var shotWhiff = 0
     
     var projectile: SCNNode?
     
@@ -310,9 +314,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         toggleGameStarted?()
     }
     
-    //-------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------------------------
     //Firing Code
-    //-------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------------------------
     //function that's sent to coordinator
     @objc
     func toggleFire(isFireMode: Bool){
@@ -353,8 +357,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         self.rootNode.addChildNode(lineNode)
     }
 
-    
-    func launchProjectile(from startPoint: SCNVector3, to endPoint: SCNVector3) {
+    // type:
+    // 1. regular shot (lob)
+    // 2. laser
+    func launchProjectile(from startPoint: SCNVector3, to endPoint: SCNVector3, type: Int) {
         // cannot fire if ammo = 0
         if (ammunition == 0) {
             return
@@ -378,28 +384,40 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             //Add scalar, edit as needed, maybe add to paramter later for different shots
             let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
             
-            // used to dampen if going to far
-            var dampingFactor: Float = 0.1
-            
-            if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY) {
-                if (forceVector.x > forceVector.y) {
-                    dampingFactor = 15/forceVector.x
-                } else {
-                    dampingFactor = 15/forceVector.y
+            // Normal shot ------------------------------------------------------------
+            if(type == 1 ) {
+                // used to dampen if going to far
+                var dampingFactor: Float = 0.1
+                
+                if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY) {
+                    if (forceVector.x > forceVector.y) {
+                        dampingFactor = 15/forceVector.x
+                    } else {
+                        dampingFactor = 15/forceVector.y
+                    }
                 }
-            }
-            //Dampen if going to far
-            let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
+                //Dampen if going to far
+                let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
 
-//            print("\nForce vector: \(forceVector) ")
-//            print("\ndampened: \(dampenedForceVector) ")
-            
-            //Apply force to node, dampen if too much force is applied
-            if(forceVector.x >= 15 || forceVector.y >= 15) {
-                projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
+    //            print("\nForce vector: \(forceVector) ")
+    //            print("\ndampened: \(dampenedForceVector) ")
+                
+                //Apply force to node, dampen if too much force is applied
+                if(forceVector.x >= 15 || forceVector.y >= 15) {
+                    projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
+                } else {
+                    projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
+                }
+            } else if (type == 2) {
+                let laserForceVector = SCNVector3(forceVector.x * 10, forceVector.y * 10, forceVector.z)
+                projectile?.physicsBody?.applyForce(laserForceVector, asImpulse: true)
             } else {
+                //just fires basic shot if no inptu for some reason
                 projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
             }
+            
+
+            
             // For freezing turn
             projectileIsFlying = true
             
@@ -411,6 +429,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             playerBoostCount=10
         }
     }
+    
     // removes line drawn for trajectory
     func removeLine() {
         self.lineNode?.removeFromParentNode()
@@ -450,7 +469,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             textGeo.string = "shots: \(ammunition)"
         }
     }
-    ///------------------------------------------------
+    //------------------------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------------------
     
     func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
         
@@ -495,7 +515,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     func turnEndedPressed() {
         turnEnded = true
     }
-
+    var count = 0
     func toggleTurns() {
         let player: Int
         if (activePlayer == 1){
@@ -531,11 +551,27 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 }
                 // Wait for projectile
                 while (self.projectileIsFlying)  {
+                    
                     if (self.semaphore.wait(timeout: .now() + 0.1) == .timedOut) {
                         //Keep checking if projectile is still flying (go down to physics body for contact)
-                        print("\n waiting")
+                        // checks if projectile completely whiffed and is fyling through the air
+                        self.count+=1
+                        if (self.count == 20){
+                            self.shotWhiff = 1
+                        }
+                        
+                        if (self.shotWhiff == 1) {
+                            print("\n shot whiffed")
+                            self.shotWhiff = 0
+                            self.count = 0
+                            self.projectileIsFlying = false
+                            self.semaphore.signal()
+                            break
+                        }
+                        
+                        print("\n waiting \(self.count)")
                     } else {
-                        //
+                        self.count = 0
                         break
                     }
                 }
@@ -562,9 +598,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             self.turnEnded = false
             // delete projectile nodes
             self.deleteProjectiles()
-            // reset ammo to 1 for next turn
-            self.giveAmmo()
-            
             //toggle palyer control
             if (player == 1){
                 self.activePlayer = 2
@@ -579,10 +612,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             // may cause issues with manually triggering turn change
             
             
-            
             // Add buffer of time before passing control to avoid troll situations
             for i in (1...3).reversed() {
+                
                 DispatchQueue.main.async {
+                    //store whether player is allowed to move or not
+                    self.moveFlag = self.canMove
+                    // cannot move during turn transition
+                    self.canMove = false
+                    
                     let swapText = SCNText(string: "Passing Control to Player \(self.activePlayer) in \(i)", extrusionDepth: 0.0)
                     swapText.font = UIFont.systemFont(ofSize: 5)
                     swapNode = SCNNode(geometry: swapText)
@@ -591,11 +629,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 }
                 sleep(1) // Sleep for 1 second
                 DispatchQueue.main.async {
+                    // re-enable movement assuming player is in movement mode
+                    if(self.moveFlag == true) {
+                        self.canMove = true
+                    }
                     swapNode?.removeFromParentNode()
                 }
             }
-            
-            
+            // reset ammo to 1 for next turn, put here so player can't fire shots when turn is changing
+            self.giveAmmo()
             self.toggleTurns()
         }
     }

@@ -51,6 +51,8 @@ struct SceneKitView: UIViewRepresentable {
         var fireModeOn = false;
         // used for self reference to figure out who's turn it is
         var playerTurn: Int = 1
+        // shot type used to alter launch projectile
+        var shotType = 1
         
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
@@ -80,7 +82,8 @@ struct SceneKitView: UIViewRepresentable {
                     scene.createTrajectoryLine(from: scene.getTankPosition()!, to: touchPoint)
                     
                 } else if gesture.state == .ended && fireModeOn {
-                    scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint)
+                    // Carry on variable here
+                    scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint, type: shotType)
 
                 }
             }

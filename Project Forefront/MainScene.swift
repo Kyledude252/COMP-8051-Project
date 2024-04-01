@@ -12,17 +12,16 @@ import SceneKit
 class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
-    var cameraYOffset: Float = 0
-    
-    var cameraZOffset: Float = 38
+    var cameraYOffset: Float = -3
+    var cameraZOffset: Float = 35
     
     var player1Tank: Tank!
     var player2Tank: Tank!
     var activePlayer: Int = 1
     var tankMovingLeft = false
     var tankMovingRight = false
-    var movementPlayerSteps = 0
-    var maxMovementPlayerSteps = 25 //TODO /TURNS
+    var movementPlayerSteps = 1
+    var maxMovementPlayerSteps = 10 //TODO /TURNS
     let levelWidth: CGFloat = 100
     let levelHeight: CGFloat = 30
     var playerBoostCount = 5;
@@ -55,14 +54,16 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
+    weak var mainSceneViewModel: MainSceneViewModel?
     
     // Initializer
     override init() {
         super.init()
         
+        
+
         physicsWorld.contactDelegate = self
         background.contents = UIColor.black
-        
         
         setupCamera()
         setupBackgroundLayers()
@@ -70,9 +71,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         //Used for projectile removal
         setupProjectileStore()
         
-        
         player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red)
-        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .white)
+        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .green)
         
         rootNode.addChildNode(player1Tank)
         rootNode.addChildNode(player2Tank)
@@ -85,6 +85,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         Task(priority: .userInitiated) {
             await firstUpdate()
         }
+    }
+    
+    func setupViewModel(viewModel: MainSceneViewModel){
+        mainSceneViewModel = viewModel
     }
     
     func cleanup(){
@@ -116,22 +120,19 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     // BACKGROUND / ENVIORNMENT // ////////////
     func setupBackgroundLayers() {
         // For parallax perspective -
-        // TODO: Joe (PROBABLY)
-        
+ 
         //Example starter code
-        let backgroundNode1 = createBackgroundNode(color: .blue, position: SCNVector3(0, 0, -10), size: CGSize(width: 100, height: 20))
-        let backgroundNode2 = createBackgroundNode(color: .green, position: SCNVector3(0, 0, -20), size: CGSize(width: 120, height: 50))
-        
+//        let backgroundNode1 = createBackgroundNode(imageName: "background-612x612.jpg", position: SCNVector3(0, 0, -10), size: CGSize(width: 100, height: 20))
+        let backgroundNode2 = createBackgroundNode(imageName: "background-612x612.jpg", position: SCNVector3(0, 0, -20), size: CGSize(width: 260, height: 70))
+//
         // Add the background nodes to the scene
-        rootNode.addChildNode(backgroundNode1)
+//        rootNode.addChildNode(backgroundNode1)
         rootNode.addChildNode(backgroundNode2)
     }
     
-    func createBackgroundNode(color: UIColor, position: SCNVector3, size: CGSize) -> SCNNode {
+    func createBackgroundNode(imageName: String, position: SCNVector3, size: CGSize) -> SCNNode {
         let geometry = SCNPlane(width: size.width, height: size.height)
-        geometry.firstMaterial?.diffuse.contents = color // temp, just to show
-        // TODO: JOE
-        //        geometry.firstMaterial?.diffuse.contents = UIImage(named: imageName)  //for real use with images
+        geometry.firstMaterial?.diffuse.contents = UIImage(named: imageName)
         
         let backgroundNode = SCNNode(geometry: geometry)
         backgroundNode.position = position
@@ -164,14 +165,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     func moveActivePlayerTankLeft() {
         tankMovingLeft = true
         tankMovingRight = false
-        movementPlayerSteps = 1
-        
+        movementPlayerSteps -= 1
+        maxMovementPlayerSteps -= 1
     }
     
     func moveActivePlayerTankRight() {
         tankMovingRight = true
         tankMovingLeft = false
-        movementPlayerSteps = 1
+        movementPlayerSteps -= 1
+        maxMovementPlayerSteps -= 1
     }
     
     @MainActor
@@ -185,7 +187,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             if(playerBoostCount > 0){
                 player2Tank.moveUpward()
                 playerBoostCount -= 1
-            }
+                }
         }
     }
     
@@ -196,7 +198,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     @MainActor
     func tankMovement (){
-        if movementPlayerSteps > 0 {
+        if maxMovementPlayerSteps > 0 {
             
             if activePlayer == 1  && player1Tank.getHealth() > 0 { // Player 1
                 if tankMovingLeft {
@@ -216,7 +218,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     stopMovingTank()
                 }
             }
-            
             movementPlayerSteps -= 1
             if movementPlayerSteps == 0 {
                 stopMovingTank()
@@ -225,7 +226,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             }
         }
         
-        Task { try! await Task.sleep(nanoseconds: 10000)
+        Task { try! await Task.sleep(nanoseconds: 1000000)
             tankMovement()
         }
     }
@@ -250,11 +251,16 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
     
     func checkDeadCondition () {
-        // a little duplicated but fine for now
+        // a little duplicacated but fine for now
+        
+        let textMaterial = SCNMaterial()
+        textMaterial.diffuse.contents = UIColor.green
+
         if (player1Tank.getHealth() <= 0) {
             let winNode = SCNNode()
             var winText = SCNText()
             winText = SCNText(string: "Player 2 Wins!", extrusionDepth: 0.0)
+            winText.firstMaterial = textMaterial
             winNode.geometry = winText
             rootNode.addChildNode(winNode)
             winNode.position = SCNVector3(-35, -6, 1)
@@ -266,6 +272,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             let winNode = SCNNode()
             var winText = SCNText()
             winText = SCNText(string: "Player 1 Wins!", extrusionDepth: 0.0)
+            winText.firstMaterial = textMaterial
             winNode.geometry = winText
             rootNode.addChildNode(winNode)
             winNode.position = SCNVector3(-35, -6, 1)
@@ -432,6 +439,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             player = 1
         }
         
+        let textMaterial = SCNMaterial()
+        textMaterial.diffuse.contents = UIColor.blue
+        
         //Stuf that happens
         //deleteProjectiles()
         
@@ -444,6 +454,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             for i in (1...5).reversed() {
                 DispatchQueue.main.async {
                     let countdownText = SCNText(string: "\(i)", extrusionDepth: 0.0)
+                    countdownText.firstMaterial = textMaterial
                     countdownNode = SCNNode(geometry: countdownText)
                     countdownNode!.position = SCNVector3(-35, -10, 1)
                     self.rootNode.addChildNode(countdownNode!)
@@ -458,6 +469,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             // Player's turn message
             DispatchQueue.main.async {
                 let winText = SCNText(string: "Player \(player) turn", extrusionDepth: 0.0)
+                winText.firstMaterial = textMaterial
                 winNode = SCNNode(geometry: winText)
                 self.rootNode.addChildNode(winNode!)
                 winNode!.position = SCNVector3(-35, -6, 1)
@@ -470,7 +482,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             }
             self.activePlayer = player
             self.projectileShot = false
-            
+            self.stopMovingTank()
+            self.maxMovementPlayerSteps = 10
+            self.playerBoostCount = 5
+            self.mainSceneViewModel?.resetUIVariablesOnTurnChange()
         }
     }
 

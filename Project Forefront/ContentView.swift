@@ -26,9 +26,12 @@ struct ContentView: View {
     @State private var sliderValue: Double = 0.5
     @State private var isMovingLeft = false
     @State private var isMovingRight = false
+    @State private var totalBoosts = 5
+    @State private var totalMovement = 10
+
     
     var body: some View {
-
+        
         if isGameStarted {
             SceneKitView(scene: mainSceneViewModel.scene, mainSceneViewModel: mainSceneViewModel)
                 .gesture(DragGesture().onChanged { value in
@@ -49,10 +52,10 @@ struct ContentView: View {
                         sliderValue = 0.5
                         
                     }
-
+                    
                 }
             
-            HStack(spacing: 1) {
+            HStack(spacing:1) {
                 Button(action: {
                     if (!isMovingLeft) {
                         if (isMovingRight){
@@ -67,7 +70,7 @@ struct ContentView: View {
                         }
                     }
                 }) {
-                    Text("Move Left").frame(maxWidth: .infinity, minHeight: 80)
+                    Text("Move Left").frame(maxWidth: .infinity, minHeight: 60)
                 }
                 .buttonStyle(ButtonTap())
                 
@@ -86,44 +89,67 @@ struct ContentView: View {
                         }
                     }
                 }) {
-                    Text("Move Right").frame(maxWidth: .infinity, minHeight: 80)
+                    Text("Move Right").frame(maxWidth: .infinity, minHeight: 60)
                 }
                 .buttonStyle(ButtonTap())
                 
-//                Button(action: mainSceneViewModel.handleAimRotateLeft) {
-//                    Text("AimRotateLeft").frame(maxWidth: .infinity, minHeight: 80)
-//                }.buttonStyle(ButtonToggle(which: 2))
-//                
-//                Button(action: mainSceneViewModel.handleAimRotateRight) {
-//                    Text("AimRotateRight").frame(maxWidth: .infinity, minHeight: 80)
-//                }.buttonStyle(ButtonToggle(which: 3))
-//                
-//                VStack {
-//                    Text("POWER: \(sliderValue, specifier: "%.2f")")
-//                        .padding()
-//                    
-//                    Slider(value: $sliderValue, in: 0...1, step: 0.1)
-//                        .onChange(of: sliderValue) { newValue in
-//                            mainSceneViewModel.handleAdjustPower(powerLevel: newValue)
-//                        }
-//                }
-//                
-//                Button(action: mainSceneViewModel.handleFire) {
-//                    Text("Fire!").frame(maxWidth: .infinity, minHeight: 80)
-//                }.buttonStyle(ButtonToggle(which: 3))
-//                
+                //                Button(action: mainSceneViewModel.handleAimRotateLeft) {
+                //                    Text("AimRotateLeft").frame(maxWidth: .infinity, minHeight: 80)
+                //                }.buttonStyle(ButtonToggle(which: 2))
+                //
+                //                Button(action: mainSceneViewModel.handleAimRotateRight) {
+                //                    Text("AimRotateRight").frame(maxWidth: .infinity, minHeight: 80)
+                //                }.buttonStyle(ButtonToggle(which: 3))
+                //
+                //                VStack {
+                //                    Text("POWER: \(sliderValue, specifier: "%.2f")")
+                //                        .padding()
+                //
+                //                    Slider(value: $sliderValue, in: 0...1, step: 0.1)
+                //                        .onChange(of: sliderValue) { newValue in
+                //                            mainSceneViewModel.handleAdjustPower(powerLevel: newValue)
+                //                        }
+                //                }
+                //
+                //                Button(action: mainSceneViewModel.handleFire) {
+                //                    Text("Fire!").frame(maxWidth: .infinity, minHeight: 80)
+                //                }.buttonStyle(ButtonToggle(which: 3))
+                //
+                Spacer(minLength: 5)
+                HStack(spacing: 5) {
+                    ForEach(0..<2, id: \.self) { row in
+                        VStack(spacing: 5) {
+                            ForEach((0..<5).reversed(), id: \.self) { column in
+                                let index = row * 5 + column
+                                Circle()
+                                    .fill(index < mainSceneViewModel.playerMovementCount ? Color.green : Color.red)
+                                    .frame(width: 10, height: 10)
+                            }
+                        }
+                    }
+                }
+                Spacer(minLength: 200)
+                VStack(spacing: 5) {
+                    ForEach((0..<totalBoosts).reversed(), id: \.self) { index in
+                        Circle()
+                            .fill(index < mainSceneViewModel.playerBoostCount ? Color.green : Color.red)
+                            .frame(width: 10, height: 10)
+                    }
+                }
+                Spacer(minLength: 5)
+
+                
+                
                 // Temporary button to debug damage
                 Button(action: mainSceneViewModel.rocketBoost) {
-                    Text("Rocket\nBoost").frame(maxWidth: .infinity, minHeight: 80)
+                    Text("Rocket\nBoost").frame(maxWidth: .infinity, minHeight: 60)
                 }.buttonStyle(ButtonTap())
                 // Swapped to turn end
-                Button(action: mainSceneViewModel.scene.levelNode.randomExplosion) {
-                    Text("Random Explosion").frame(maxWidth: .infinity, minHeight: 80)
-                }.buttonStyle(ButtonTap())
+                //                Button(action: mainSceneViewModel.scene.levelNode.randomExplosion) {
+                //                    Text("Random Explosion").frame(maxWidth: .infinity, minHeight: 60)
+                //                }.buttonStyle(ButtonTap())
             }
-            .opacity(1)
-            .transition(.opacity)
-        
+            .edgesIgnoringSafeArea(.all)
             
         } else {
             StartScreenView {

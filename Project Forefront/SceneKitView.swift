@@ -81,7 +81,7 @@ struct SceneKitView: UIViewRepresentable {
                     toggleFire() // temp
                     
                     // disable fire mode <-- simply toggle this later
-                    toggleButton?.isEnabled = false
+//                    toggleButton?.isEnabled = false
                     
                     // for testing ---------------------------------------
                     // add this to a turn that can be timed

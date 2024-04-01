@@ -10,17 +10,28 @@ import SceneKit
 
 class MainSceneViewModel: ObservableObject {
     @Published var scene = MainScene()
+    @Published var playerBoostCount = 5
+    @Published var playerMovementCount = 10
     
+    
+    init(){
+        scene.setupViewModel(viewModel: self)
+    }
+
     func updateCameraPosition(cameraXOffset: Float, cameraYOffset: Float) {
         // CALL FUNCTIONS IN SCENE FROM HERE LIKE THIS
         scene.updateCameraPosition(cameraXOffset: cameraXOffset, cameraYOffset: cameraYOffset)
     }
     
+    
+    
     func moveTankLeft(){
         scene.moveActivePlayerTankLeft()
+        playerMovementCount = scene.maxMovementPlayerSteps
     }
     func moveTankRight(){
         scene.moveActivePlayerTankRight()
+        playerMovementCount = scene.maxMovementPlayerSteps
     }
     func stopMoving(){
         scene.stopMovingTank()
@@ -41,8 +52,16 @@ class MainSceneViewModel: ObservableObject {
 //        scene.takeDamage()
     }
     
+
     @MainActor func rocketBoost(){
         scene.moveActivePlayerTankVertically()
+        playerBoostCount = scene.playerBoostCount
+
+    }
+    
+    func resetUIVariablesOnTurnChange(){
+        playerBoostCount = scene.playerBoostCount
+        playerMovementCount = scene.maxMovementPlayerSteps
 
     }
     

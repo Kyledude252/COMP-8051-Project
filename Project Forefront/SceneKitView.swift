@@ -69,10 +69,14 @@ struct SceneKitView: UIViewControllerRepresentable {
         var toggleButton: UIButton?
         //toggle boolean for fire mode on/off
         var fireModeOn = false;
+        // used for self reference to figure out who's turn it is
+        var playerTurn: Int = 1
         
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
             self.mainScene = mainScene
+            //Put this bad boy here to trigger as soon as MainScene is rendered, kind of bandaid fix honestly
+            mainScene.toggleTurns()
         }
         
         //sets up gesture
@@ -94,8 +98,10 @@ struct SceneKitView: UIViewControllerRepresentable {
                 if gesture.state == .changed && fireModeOn {
                     // calling from MainScene
                     scene.createTrajectoryLine(from: scene.getTankPosition()!, to: touchPoint)
+                    
                 } else if gesture.state == .ended && fireModeOn {
                     scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint)
+
                 }
             }
         }
@@ -116,11 +122,17 @@ struct SceneKitView: UIViewControllerRepresentable {
                 if button.title(for: .normal) == "Fire Mode" {
                     button.setTitle("Move Mode", for: .normal)
                     button.backgroundColor = .blue
-                    fireModeOn = false //toggles fire mode off
+                    //toggles fire mode off
+                    fireModeOn = false
+                    //removes line drawn, another safeguard to remove this artifact
+                    mainScene.removeLine()
+                    //toggle tank movement back on
+                    mainScene.toggleTankMove(move: true)
                 } else if button.title(for: .normal) == "Move Mode" {
                     button.setTitle("Fire Mode", for: .normal)
                     button.backgroundColor = .red
                     fireModeOn = true //toggles fire mode on
+                    mainScene.toggleTankMove(move: false)
                 }
             }
         }
@@ -130,6 +142,10 @@ struct SceneKitView: UIViewControllerRepresentable {
             fireModeText()
             //does not trigger toggle fire unless fireMode is on
             mainScene.toggleFire(isFireMode: fireModeOn)
+        }
+        // doesn't need to be used
+        @objc func disableFireButton() {
+            toggleButton?.isEnabled = false
         }
     }
     

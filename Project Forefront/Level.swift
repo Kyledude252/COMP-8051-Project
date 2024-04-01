@@ -121,8 +121,8 @@ class Level: SCNNode {
     
     func randomExplosion() {
         let size = Int.random(in: 3...20)
-        let posX = Int.random(in: 1...numRows-1)
-        let posY = Int.random(in: 1...numCols-1)
+        let posY = Int.random(in: 1...numRows-1)
+        let posX = Int.random(in: 1...numCols-1)
         deleteCubes(col: posX, row: posY, radius: size)
     }
     

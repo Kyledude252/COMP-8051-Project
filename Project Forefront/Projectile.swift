@@ -29,6 +29,8 @@ class Projectile: SCNNode {
         let physicsBody = SCNPhysicsBody(type: .dynamic, shape: nil)
         self.physicsBody = physicsBody
         physicsBody.categoryBitMask = PhysicsCategory.projectile
+      
+        //Creates new bitmask which contains both bitmasks of levelSquare and tank
         physicsBody.contactTestBitMask = PhysicsCategory.levelSquare | PhysicsCategory.tank
         
         // important!

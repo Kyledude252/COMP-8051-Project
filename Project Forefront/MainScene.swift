@@ -45,8 +45,20 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     // Adjusts how far the tank can shoot
     var maxProjectileX: Float = 15.0
     var maxProjectileY: Float = 15.0
-    
-    let triggerPeriod = 0.1
+    // used to determine whether player can fire or not
+    var ammunition: Int = 1
+    // used for ammo count
+    var ammoNode: SCNNode?
+    // used to check if player can move (is in move mode)
+    var canMove: Bool = true
+    // used to check if turnEnd button is clicked
+    var turnEnded: Bool = false
+    // turn time
+    var turnTime: Int = 20
+    // check if projectile is in the air
+    var projectileIsFlying: Bool = false
+    // Semaphore for freezing projectile
+    let semaphore = DispatchSemaphore(value: 0)
     
     var projectile: SCNNode?
     
@@ -70,6 +82,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         setupForegroundLevel()
         //Used for projectile removal
         setupProjectileStore()
+        //Used for firing once per turn
+        setUpAmmo()
         
         player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red)
         player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .green)
@@ -79,8 +93,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         
         print("Position of player1Tank: \(player1Tank.position)")
         print("Position of player1Tank: \(player2Tank.position)")
-
-        
         
         Task(priority: .userInitiated) {
             await firstUpdate()
@@ -163,6 +175,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     
     func moveActivePlayerTankLeft() {
+        // If player is not allowed to move, function is disabled
+        if (canMove == false) {
+            return
+        }
         tankMovingLeft = true
         tankMovingRight = false
         movementPlayerSteps -= 1
@@ -170,6 +186,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
     
     func moveActivePlayerTankRight() {
+        // If player is not allowed to move, function is disabled
+        if (canMove == false) {
+            return
+        }
         tankMovingRight = true
         tankMovingLeft = false
         movementPlayerSteps -= 1
@@ -178,6 +198,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     @MainActor
     func moveActivePlayerTankVertically(){
+        // If player is not allowed to move, function is disabled
+        if (canMove == false) {
+            return
+        }
         if activePlayer == 1  && player1Tank.getHealth() > 0 {
             if(playerBoostCount > 0){
                 player1Tank.moveUpward()
@@ -194,6 +218,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     func stopMovingTank() {
         tankMovingLeft = false
         tankMovingRight = false
+    }
+    
+    
+    // used in sceneKitView to match with firemode button
+    func toggleTankMove(move: Bool) {
+        canMove = move
     }
     
     @MainActor
@@ -332,6 +362,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
     
     func launchProjectile(from startPoint: SCNVector3, to endPoint: SCNVector3) {
+        // cannot fire if ammo = 0
+        if (ammunition == 0) {
+            return
+        }
         if (!projectileShot){
             projectile = Projectile(from: startPoint)
 
@@ -373,10 +407,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             } else {
                 projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
             }
+            // For freezing turn
+            projectileIsFlying = true
             
             // Remove line again
             removeLine()
-            
+            // fired shot, therefore used ammo
+            removeAmmo()
             projectileShot = true
             playerBoostCount=10
         }
@@ -395,11 +432,42 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             childNode.removeFromParentNode()
         }
     }
+    // used to set-up text for ammunition
+    func setUpAmmo() {
+        let ammoText = SCNText(string: "shots: \(ammunition)", extrusionDepth: 0.0)
+        ammoText.font = UIFont.systemFont(ofSize: 3)
+        ammoNode = SCNNode(geometry: ammoText)
+        ammoNode?.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+        ammoNode!.position = SCNVector3(-45, 8, 1)
+        self.rootNode.addChildNode(ammoNode!)
+    }
+    // sets ammo to one, can be changed later to add different ammo for different weapon types
+    func giveAmmo() {
+        ammunition = 1
+        //update screen display
+        if let textGeo = ammoNode?.geometry as? SCNText {
+            textGeo.string = "shots: \(ammunition)"
+        }
+    }
+    // sets ammo to 0, can be changed later
+    func removeAmmo() {
+        ammunition = 0
+        // update screen display
+        if let textGeo = ammoNode?.geometry as? SCNText {
+            textGeo.string = "shots: \(ammunition)"
+        }
+    }
     ///------------------------------------------------
     
     func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
+        
         let contactMask = contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask
         if contactMask == (PhysicsCategory.levelSquare | PhysicsCategory.projectile) {
+
+            //Check flag for freezing timer
+            projectileIsFlying = false
+            semaphore.signal()
+
 
             levelNode.explode(pos: contact.nodeA.position)
             let dx1 = contact.contactPoint.x - player1Tank.position.x
@@ -417,7 +485,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
         }else if contactMask == (PhysicsCategory.tank | PhysicsCategory.projectile){
             //Tank specific collision if we do that
+
         }
+
     }
     
     func getTankPosition() -> SCNVector3? {
@@ -429,63 +499,131 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         return nil
     }
 
-    
+    func turnEndedPressed() {
+        turnEnded = true
+    }
 
     func toggleTurns() {
         let player: Int
         if (activePlayer == 1){
-            player = 2
-        } else {
             player = 1
+        } else {
+            player = 2
         }
         
+
         let textMaterial = SCNMaterial()
         textMaterial.diffuse.contents = UIColor.blue
         
         //Stuf that happens
         //deleteProjectiles()
         
+
         // Declare countdownNode and winNode outside the closure
         var countdownNode: SCNNode?
         var winNode: SCNNode?
+        var swapNode: SCNNode?
         
         // Countdown
         DispatchQueue.global().async {
-            for i in (1...5).reversed() {
+            for i in (1...self.turnTime).reversed() {
+                if (self.turnEnded == true) {
+                    break
+                }
                 DispatchQueue.main.async {
                     let countdownText = SCNText(string: "\(i)", extrusionDepth: 0.0)
                     countdownText.firstMaterial = textMaterial
                     countdownNode = SCNNode(geometry: countdownText)
                     countdownNode!.position = SCNVector3(-35, -10, 1)
                     self.rootNode.addChildNode(countdownNode!)
-                    print("Countdown: \(i)")
+                    //print("Countdown: \(i)")
+                    //player stuff to determine who's turn it is
+                    let winText = SCNText(string: "Player \(player) turn", extrusionDepth: 0.0)
+                    winText.font = UIFont.systemFont(ofSize: 5)
+                    winNode = SCNNode(geometry: winText)
+                    self.rootNode.addChildNode(winNode!)
+                    winNode!.position = SCNVector3(-35, 1, 1)
+                    //print("Player \(player) turn")
                 }
+                // Wait for projectile
+                while (self.projectileIsFlying)  {
+                    if (self.semaphore.wait(timeout: .now() + 0.1) == .timedOut) {
+                        //Keep checking if projectile is still flying (go down to physics body for contact)
+                        print("\n waiting")
+                    } else {
+                        //
+                        break
+                    }
+                }
+                
                 sleep(1) // Sleep for 1 second
                 DispatchQueue.main.async {
                     countdownNode?.removeFromParentNode()
+                    winNode?.removeFromParentNode()
+
+                }
+            }
+
+            // Extra check in case palyer releases 1 second before firing due to how turn timer is coded
+            while (self.projectileIsFlying)  {
+                if (self.semaphore.wait(timeout: .now() + 0.1) == .timedOut) {
+                    //Keep checking if projectile is still flying (go down to physics body for contact)
+                    print("\n waiting")
+                } else {
+                    //
+                    break
+                }
+
+            }
+            
+            //Stuf that happens to be processed between turn----------------------------------------------
+            self.turnEnded = false
+            // delete projectile nodes
+            self.deleteProjectiles()
+            // reset ammo to 1 for next turn
+            self.giveAmmo()
+            
+            //toggle palyer control
+            if (player == 1){
+                self.activePlayer = 2
+            } else {
+                self.activePlayer = 1
+            }
+            // removes line, just in case
+            self.removeLine()
+
+            self.projectileShot = false
+          
+
+
+
+            //recursive call to pass turn to other palyer on turn end
+            // may cause issues with manually triggering turn change
+            
+            
+            
+            // Add buffer of time before passing control to avoid troll situations
+            for i in (1...3).reversed() {
+                DispatchQueue.main.async {
+                    let swapText = SCNText(string: "Passing Control to Player \(self.activePlayer) in \(i)", extrusionDepth: 0.0)
+                    swapText.font = UIFont.systemFont(ofSize: 5)
+                    swapNode = SCNNode(geometry: swapText)
+                    self.rootNode.addChildNode(swapNode!)
+                    swapNode!.position = SCNVector3(-35, 1, 1)
+                }
+                sleep(1) // Sleep for 1 second
+                DispatchQueue.main.async {
+                    swapNode?.removeFromParentNode()
                 }
             }
             
-            // Player's turn message
-            DispatchQueue.main.async {
-                let winText = SCNText(string: "Player \(player) turn", extrusionDepth: 0.0)
-                winText.firstMaterial = textMaterial
-                winNode = SCNNode(geometry: winText)
-                self.rootNode.addChildNode(winNode!)
-                winNode!.position = SCNVector3(-35, -6, 1)
-                print("Player \(player) turn")
-            }
-            sleep(1) // Sleep for 1 second
-            DispatchQueue.main.async {
-                winNode?.removeFromParentNode()
-                
-            }
-            self.activePlayer = player
-            self.projectileShot = false
+            self.toggleTurns()
             self.stopMovingTank()
             self.maxMovementPlayerSteps = 10
             self.playerBoostCount = 5
             self.mainSceneViewModel?.resetUIVariablesOnTurnChange()
+
+
         }
     }
 

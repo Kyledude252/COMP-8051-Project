@@ -528,10 +528,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     ///------------------------------------------------
     ///
     
-    @IBAction func fade(_ sender: Any) {
-        
-        
-    }
     
     func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
         
@@ -542,25 +538,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             projectileIsFlying = false
             semaphore.signal()
 
-
+            doExpLight(contact: contact)
+            
             levelNode.explode(pos: contact.nodeA.position)
-            
-            let expLightNode = SCNNode()
-            expLightNode.position = SCNVector3(x: contact.contactPoint.x, y: contact.contactPoint.y + 0.1, z: contact.contactPoint.z)
-            expLightNode.light = SCNLight()
-            expLightNode.light?.type = SCNLight.LightType.omni
-            expLightNode.light?.intensity = 100000
-            expLightNode.light?.attenuationStartDistance = 3
-            expLightNode.light?.attenuationFalloffExponent = 4
-            expLightNode.light?.attenuationEndDistance = 300
-            expLightNode.light?.color = UIColor(red: 0.96, green: 0.61, blue: 0.98, alpha: 1)
-            rootNode.addChildNode(expLightNode)
-            
-            SCNTransaction.animationDuration = 0.4
-            expLightNode.light?.intensity = 0
-        
-
-            expLightNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.5), SCNAction.removeFromParentNode()]))
             
             let dx1 = contact.contactPoint.x - player1Tank.position.x
             let dz1 = contact.contactPoint.z - player1Tank.position.z
@@ -580,6 +560,46 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
         }
 
+    }
+    
+    func doExpLight(contact: SCNPhysicsContact) {
+        let expLightNode = SCNNode()
+        expLightNode.position = SCNVector3(x: contact.contactPoint.x, y: contact.contactPoint.y + 0.1, z: contact.contactPoint.z + 2)
+        expLightNode.light = SCNLight()
+        expLightNode.light?.type = SCNLight.LightType.omni
+        expLightNode.light?.intensity = 0
+        expLightNode.light?.attenuationStartDistance = 5
+        expLightNode.light?.attenuationFalloffExponent = 3
+        expLightNode.light?.attenuationEndDistance = 15
+        expLightNode.light?.color = UIColor(red: 0.96, green: 0.61, blue: 0.98, alpha: 1)
+        rootNode.addChildNode(expLightNode)
+        
+        let anim = CABasicAnimation(keyPath: "intensity")
+        anim.fromValue = 300000
+        anim.toValue = 0
+        anim.duration = 0.3
+        anim.repeatCount = 0
+        anim.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+        
+        let expFlatNode = SCNNode()
+        expFlatNode.geometry = SCNCylinder(radius: 5.5, height: 1)
+        expFlatNode.rotation = SCNVector4(1, 0, 0, Float.pi/2)
+        expFlatNode.position = SCNVector3(contact.contactPoint.x, contact.contactPoint.y, contact.contactPoint.z)
+        expFlatNode.geometry?.firstMaterial?.diffuse.contents = UIColor.white
+        expFlatNode.geometry?.firstMaterial?.transparency = 0.0
+        rootNode.addChildNode(expFlatNode)
+        
+        let anim2 = CABasicAnimation(keyPath: "transparency")
+        anim2.fromValue = 1.0
+        anim2.toValue = 0.0
+        anim2.duration = 0.2
+        anim2.repeatCount = 0
+        anim2.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeIn)
+        
+        expLightNode.light?.addAnimation(anim, forKey: "dim")
+        expFlatNode.geometry?.firstMaterial?.addAnimation(anim2, forKey: "fade")
+        expLightNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.5), SCNAction.removeFromParentNode()]))
+        expFlatNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.3), SCNAction.removeFromParentNode()]))
     }
     
     func getTankPosition() -> SCNVector3? {

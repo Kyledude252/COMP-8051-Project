@@ -79,6 +79,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         setupCamera()
         setupBackgroundLayers()
         setupForegroundLevel()
+        setupLights()
         //Used for projectile removal
         setupProjectileStore()
         //Used for firing once per turn
@@ -164,6 +165,42 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         rootNode.addChildNode(levelNode)
         
         print("Position of levelNode after rotation: \(levelNode.position)")
+    }
+    
+    func setupLights() {
+        let ambientLight = SCNNode()
+        ambientLight.light = SCNLight()
+        ambientLight.light?.type = SCNLight.LightType.ambient
+        ambientLight.light?.color = UIColor.white
+        ambientLight.light?.intensity = 500
+        rootNode.addChildNode(ambientLight)
+        
+        let sunLight = SCNNode()
+        sunLight.light = SCNLight()
+        sunLight.light?.type = SCNLight.LightType.directional
+        let lDirVal = Int(Date().timeIntervalSince1970) % 5
+        var lDirVec: SCNVector3
+        switch lDirVal {
+        case 0:
+            lDirVec = SCNVector3(4, -0.5, 1)
+        case 1:
+            lDirVec = SCNVector3(2, -1, 1)
+        case 2:
+            lDirVec = SCNVector3(1, -1, 1)
+        case 3:
+            lDirVec = SCNVector3(-1.5, -1, 1)
+        case 4:
+            lDirVec = SCNVector3(-3, -1, 1)
+        default:
+            lDirVec = SCNVector3(0, -1, 0.2)
+        }
+        sunLight.look(at: lDirVec)
+        sunLight.light?.intensity = 3000
+        rootNode.addChildNode(sunLight)
+        
+        let uLight = SCNNode()
+        uLight = SCNLight()
+        uLight.light?.type = SCNLight.LightType.omni
     }
     
     // PLAYER CONTROL & SWITCHING // ///////////
@@ -370,14 +407,18 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             let offsetFactor: Float = 0.02
             let offsetStartingPosition = SCNVector3(startPoint.x + (direction.x * offsetFactor), startPoint.y + (direction.y * offsetFactor), startPoint.z + direction.z * offsetFactor)
             
-//            let lightOffsetFactor: Float = 0.01
-//            let lightOffsetPos = SCNVector3(startPoint.x + (direction.x * lightOffsetFactor), startPoint.y + (direction.y * lightOffsetFactor), startPoint.z + direction.z * lightOffsetFactor)
+            let lightOffsetFactor: Float = 0.01
+            let lightOffsetPos = SCNVector3(startPoint.x + (direction.x * lightOffsetFactor), startPoint.y + (direction.y * lightOffsetFactor), startPoint.z + direction.z * lightOffsetFactor)
             
             let shotLightNode = SCNNode()
-            shotLightNode.position = startPoint
+            shotLightNode.position = offsetStartingPosition
             shotLightNode.light = SCNLight()
-            shotLightNode.light?.type = SCNLight.LightType.spot
-            shotLightNode.light?.intensity = 2000
+            shotLightNode.light?.type = SCNLight.LightType.omni
+            shotLightNode.light?.intensity = 50000
+            shotLightNode.light?.attenuationStartDistance = 0
+            shotLightNode.light?.attenuationFalloffExponent = 4
+            shotLightNode.light?.attenuationEndDistance = 13
+            shotLightNode.light?.color = UIColor(red: 0.95, green: 0.9, blue: 0.6, alpha: 1)
             rootNode.addChildNode(shotLightNode)
             
             shotLightNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.1), SCNAction.removeFromParentNode()]))

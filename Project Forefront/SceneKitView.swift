@@ -24,6 +24,7 @@ struct SceneKitView: UIViewRepresentable {
         //button position
         context.coordinator.setupFireButton(on: scnView)
         context.coordinator.setupGestureRecognizers(on: scnView)
+        context.coordinator.setupPicker(on: scnView)
         
         return scnView
     }
@@ -40,7 +41,8 @@ struct SceneKitView: UIViewRepresentable {
     //Coordinator class, needed to handle functions from MainScene
     //without coordinator functins from main scene would apply to another instance of main scene
     // which is not veiwable with the current view
-    class Coordinator: NSObject {
+    class Coordinator: NSObject, UIPickerViewDelegate, UIPickerViewDataSource {
+        
         // Scenekit View
         var parent: SceneKitView
         // Scnview
@@ -53,6 +55,8 @@ struct SceneKitView: UIViewRepresentable {
         var playerTurn: Int = 1
         // shot type used to alter launch projectile
         var shotType = 1
+        // array with shot types
+        let shotTypes = ["Lob","Laser", "Orignator"]
         
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
@@ -88,6 +92,34 @@ struct SceneKitView: UIViewRepresentable {
                 }
             }
         }
+        
+        func setupPicker(on view: SCNView) {
+            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 100, width: 100, height: 100))
+            pickerView.delegate = self
+            pickerView.dataSource = self
+            pickerView.backgroundColor = .green
+            view.addSubview(pickerView)
+            
+        }
+        
+        func numberOfComponents(in pickerView: UIPickerView) -> Int {
+            return 1
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+            return 3
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+            return shotTypes[row]
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+            shotType = row + 1
+            print("shot type: ", shotType)
+        }
+        
+
         
         // Creates fire button on screen view, so it remains on screen when panning
         func setupFireButton(on view: SCNView) {

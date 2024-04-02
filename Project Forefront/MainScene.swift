@@ -484,9 +484,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             if(sqrt(dx1*dx1+dz1+dz1) < 5 && contact.nodeB.parent != nil){
                 //NOTE distance is set to 5 to line up with explosion side of 10, since the level blocks are 0.5 scale. If we have different explosion sizes or change the scale of the cubes the distance here should be explosionSize*LevelCubeScale. Something to change later when we make different explosives with different sizes and figure out that system.
                 player1Tank.decreaseHealth(damage: 10)
+                let forceMagnitude: Float = 60
+                player1Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
             }
             if(sqrt(dx2*dx2+dz2+dz2) < 5 && contact.nodeB.parent != nil){
                 player2Tank.decreaseHealth(damage: 10)
+                let forceMagnitude: Float = 60
+                player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
             }
             contact.nodeB.removeFromParentNode()
             

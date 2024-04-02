@@ -33,6 +33,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     var projectileShot = false
     
+    var projectileJustShot = false
+    
     //grab view
     weak var scnView: SCNView?
     // holds line for redrawing it
@@ -89,8 +91,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         //Used for firing once per turn
         setUpAmmo()
         
-        player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red)
-        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .green)
+        player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red, name: "Tank1")
+        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .green, name: "Tank2")
         
         rootNode.addChildNode(player1Tank)
         rootNode.addChildNode(player2Tank)
@@ -519,7 +521,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             // fired shot, therefore used ammo
             removeAmmo()
             projectileShot = true
+            projectileJustShot = true
             playerBoostCount=10
+            
+            Task { try! await Task.sleep(nanoseconds:100000000)
+                projectileJustShot = false
+            }
         }
     }
     
@@ -620,7 +627,39 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
         }else if contactMask == (PhysicsCategory.tank | PhysicsCategory.projectile){
             //Tank specific collision if we do that
-
+            
+            if (!projectileJustShot) {
+                //Check flag for freezing timer
+                projectileIsFlying = false
+                semaphore.signal()
+                
+                if (contact.nodeA.name == "Tank1") {
+                    levelNode.explode(pos: contact.nodeA.position)
+                    player1Tank.decreaseHealth(damage: 20)
+                    let forceMagnitude: Float = 60
+                    player1Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                }
+                if (contact.nodeA.name == "Tank2") {
+                    levelNode.explode(pos: contact.nodeA.position)
+                    player2Tank.decreaseHealth(damage: 20)
+                    let forceMagnitude: Float = 60
+                    player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                }
+                contact.nodeB.removeFromParentNode()
+                
+                guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
+                    print("Failed to load explosion.mp3")
+                    return
+                }
+                
+                explodeSource.loops = false
+                explodeSource.volume = 0.3
+                explodeSource.isPositional = false
+                explodeSource.load()
+                let explodeFX = SCNAudioPlayer(source: explodeSource)
+                rootNode.addAudioPlayer(explodeFX)
+                print("ADDED EXPLOSION")
+            }
         }
 
     }

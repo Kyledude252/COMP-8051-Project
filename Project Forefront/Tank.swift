@@ -115,8 +115,10 @@ class Tank: SCNNode {
             health = 0
         }
         
-        // Temporary implementation, to be replaced by asset
+        
         let healthNumbers = SCNText(string: String(format: "%d/%d", health, maxHealth), extrusionDepth: 0.0)
+        
+
         healthBar.geometry = healthNumbers
     }
     

@@ -78,7 +78,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         // shot type used to alter launch projectile
         var shotType = 1
         // array with shot types
-        let shotTypes = ["Lob","Laser", "Triple"]
+        let shotTypes = ["Lob","Laser", "Triple", "Царь-бомба"]
         
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
@@ -116,7 +116,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         }
         
         func setupPicker(on view: SCNView) {
-            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 100, width: 100, height: 100))
+            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 70, width: 100, height: 100))
             pickerView.delegate = self
             pickerView.dataSource = self
             pickerView.backgroundColor = .green
@@ -129,7 +129,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         }
         
         func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-            return 3
+            return 4
         }
         
         func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
@@ -145,7 +145,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         
         // Creates fire button on screen view, so it remains on screen when panning
         func setupFireButton(on view: SCNView) {
-            let button = UIButton(frame: CGRect(x: 20, y: 50, width: 100, height: 50))
+            let button = UIButton(frame: CGRect(x: 20, y: 20, width: 100, height: 50))
             //button color, tittle, action
             button.backgroundColor = .blue
             button.setTitle("Move Mode", for: .normal)

@@ -62,6 +62,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     let semaphore = DispatchSemaphore(value: 0)
     // shot type use for semaphore, to stop waiting if firing laser
     var shotWhiff = 0
+    // explosion radius
+    var explosionRadius = 10
+    // Damage taken from shot
+    var damage = 10
     
     //var projectile: SCNNode?
     
@@ -444,17 +448,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         if (!projectileShot){
             var projectile: SCNNode?
             projectile = Projectile(from: startPoint)
-            var p1: SCNNode?
-            var p2: SCNNode?
-            p1 = Projectile(from: startPoint)
-            p2 = Projectile(from: startPoint)
 
             //Get direction of vector
             let direction = SCNVector3(endPoint.x - startPoint.x, endPoint.y - startPoint.y, 0)//endPoint.z - startPoint.z)
             
             // need offset to avoid physics
             // might need to edit this value later to change interactions
-            let offsetFactor: Float = 0.02
+            let offsetFactor: Float = 0.06
             let offsetStartingPosition = SCNVector3(startPoint.x + (direction.x * offsetFactor), startPoint.y + (direction.y * offsetFactor), startPoint.z + direction.z * offsetFactor)
             
             let lightOffsetFactor: Float = 0.01
@@ -474,13 +474,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             shotLightNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.1), SCNAction.removeFromParentNode()]))
             
             projectile?.position = offsetStartingPosition
-            p1?.position = offsetStartingPosition
-            p2?.position = offsetStartingPosition
 
             //Use to remove later
             projectileStore.addChildNode(projectile!)
-            projectileStore.addChildNode(p1!)
-            projectileStore.addChildNode(p2!)
             
             //Add scalar, edit as needed, maybe add to paramter later for different shots
             let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
@@ -502,31 +498,39 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 //            print("\ndampened: \(dampenedForceVector) ")
             
             //Apply force to node, dampen if too much force is applied
-            
             // Normal shot w/ dampening ------------------------------------------------------------
             if(type == 1 ) {
+                explosionRadius = 10
+                damage = 10
+                print("Type 1 shot fired")
                 if(forceVector.x >= 15 || forceVector.y >= 15) {
                     projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
                 } else {
                     projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
                 }
             } else if (type == 2) { // laser
+                explosionRadius = 4
+                damage = 30
                 let laserForceVector = SCNVector3(forceVector.x * 10, forceVector.y * 10, forceVector.z)
                 projectile?.physicsBody?.applyForce(laserForceVector, asImpulse: true)
             }  else if (type == 3) { // triple shot
-                
-                projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
-                print("Shot fired")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    p1?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
-                    print("Shot fired")
+                explosionRadius = 10
+                damage = 7
+                print("type 3 shot fired")
+                deleteProjectiles()
+                for i in 0...2 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0 * Double(i)) {
+                        self.launchHelper(start: offsetStartingPosition, force: forceVector, dampForce: dampenedForceVector)
+                    }
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    p2?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
-                    print("Shot fired")
+            } else if (type == 4) {
+                explosionRadius = 40
+                damage = 50
+                if(forceVector.x >= 15 || forceVector.y >= 15) {
+                    projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
+                } else {
+                    projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
                 }
-                sleep(1)
-                
             } else {
                 //just fires basic shot if no inptu for some reason
                 projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
@@ -544,6 +548,26 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             removeAmmo()
             projectileShot = true
             playerBoostCount=10
+        }
+    }
+    
+    //maybe works?
+    func launchHelper(start: SCNVector3, force: SCNVector3, dampForce: SCNVector3) {
+        var projectile: SCNNode?
+        projectile = Projectile(from: start)
+        
+        projectile?.position = start
+
+        //Use to remove later
+        projectileStore.addChildNode(projectile!)
+        
+                    print("\nForce vector: \(force) ")
+                    print("\ndampened: \(dampForce) ")
+
+        if(force.x >= 15 || force.y >= 15) {
+            projectile?.physicsBody?.applyForce(dampForce, asImpulse: true)
+        } else {
+            projectile?.physicsBody?.applyForce(force, asImpulse: true)
         }
     }
     
@@ -579,7 +603,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         ammoText.font = UIFont.systemFont(ofSize: 3)
         ammoNode = SCNNode(geometry: ammoText)
         ammoNode?.geometry?.firstMaterial?.diffuse.contents = UIColor.red
-        ammoNode!.position = SCNVector3(-45, 8, 1)
+        ammoNode!.position = SCNVector3(-40, 10, 1)
         self.rootNode.addChildNode(ammoNode!)
     }
     // sets ammo to one, can be changed later to add different ammo for different weapon types
@@ -611,26 +635,29 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             //Check flag for freezing timer
             projectileIsFlying = false
             semaphore.signal()
-
-
-            levelNode.explode(pos: contact.nodeA.position)
+            print("explosion radius: ", explosionRadius)
+            
+            levelNode.explode(pos: contact.nodeA.position, rad: explosionRadius)
+            
             let dx1 = contact.contactPoint.x - player1Tank.presentation.worldPosition.x
             let dz1 = contact.contactPoint.z - player1Tank.presentation.worldPosition.z
             let dx2 = contact.contactPoint.x - player2Tank.presentation.worldPosition.x
             let dz2 = contact.contactPoint.z - player2Tank.presentation.worldPosition.z
-            if(sqrt(dx1*dx1+dz1+dz1) < 5 && contact.nodeB.parent != nil){
+            //idk
+            let halfOfExpRadius = Float(Double(explosionRadius) / 2.0)
+            if(sqrt(dx1*dx1+dz1+dz1) < halfOfExpRadius && contact.nodeB.parent != nil){
                 //NOTE distance is set to 5 to line up with explosion side of 10, since the level blocks are 0.5 scale. If we have different explosion sizes or change the scale of the cubes the distance here should be explosionSize*LevelCubeScale. Something to change later when we make different explosives with different sizes and figure out that system.
-                player1Tank.decreaseHealth(damage: 10)
+                player1Tank.decreaseHealth(damage: self.damage)
                 let forceMagnitude: Float = 60
                 player1Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
             }
-            if(sqrt(dx2*dx2+dz2+dz2) < 5 && contact.nodeB.parent != nil){
-                player2Tank.decreaseHealth(damage: 10)
+            if(sqrt(dx2*dx2+dz2+dz2) < halfOfExpRadius && contact.nodeB.parent != nil){
+                player2Tank.decreaseHealth(damage: self.damage)
                 let forceMagnitude: Float = 60
                 player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
             }
             contact.nodeB.removeFromParentNode()
-            
+           
             guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
                     print("Failed to load explosion.mp3")
                     return
@@ -713,7 +740,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                         //Keep checking if projectile is still flying (go down to physics body for contact)
                         // checks if projectile completely whiffed and is fyling through the air
                         self.count+=1
-                        if (self.count == 30){
+                        if (self.count == 50){
                             self.shotWhiff = 1
                         }
                         
@@ -722,6 +749,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                             self.shotWhiff = 0
                             self.count = 0
                             self.projectileIsFlying = false
+                            self.deleteProjectiles()
                             self.semaphore.signal()
                             break
                         }
@@ -776,7 +804,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             
             // Add buffer of time before passing control to avoid troll situations
-            for i in (1...3).reversed() {
+            for i in (1...2).reversed() {
                 
                 DispatchQueue.main.async {
                     //store whether player is allowed to move or not

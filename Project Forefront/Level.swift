@@ -131,7 +131,7 @@ class Level: SCNNode {
         self.removeFromParentNode()
     }
     
-    func explode(pos: SCNVector3){
+    func explode(pos: SCNVector3, rad: Int){
         var x = 0
         var y = numRows-1
         var node = cubeGrid![x][y]
@@ -143,7 +143,7 @@ class Level: SCNNode {
             y -= 1
             node = cubeGrid![x][y]
         }
-        deleteCubes(col: x, row: y, radius: 10)
+        deleteCubes(col: x, row: y, radius: rad)
     }
     
 }

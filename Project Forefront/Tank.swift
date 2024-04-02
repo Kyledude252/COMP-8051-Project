@@ -15,6 +15,7 @@ class Tank: SCNNode {
     var health: Int = 100
     let healthBar = SCNNode()
     var size: Int = 1
+    var currentSoundPlayer: SCNAudioPlayer?
    
     
     private var tankPhysicsBody: SCNPhysicsBody?
@@ -53,16 +54,48 @@ class Tank: SCNNode {
     func moveLeft() {
         let forceMagnitude: Float = 60
         tankPhysicsBody?.applyForce(SCNVector3(-forceMagnitude, 0, 0), asImpulse: false)
+        playMoveSound()
     }
     
     func moveRight() {
         let forceMagnitude: Float = 60
         tankPhysicsBody?.applyForce(SCNVector3(forceMagnitude, 0, 0), asImpulse: false)
+        playMoveSound()
+    }
+    
+    func playMoveSound(){
+        if let currentSoundPlayer = currentSoundPlayer {
+            currentSoundPlayer.audioSource?.volume = 0.01
+        }
+        
+        guard let tankSource = SCNAudioSource(named: "TankMoving.mp3") else {
+                print("Failed to load TankMoving.mp3")
+                return
+            }
+        
+        tankSource.loops = false
+        tankSource.volume = 0.08
+        tankSource.isPositional = false
+        tankSource.load()
+        let tankFX = SCNAudioPlayer(source: tankSource)
+        currentSoundPlayer = tankFX
+        addAudioPlayer(tankFX)
     }
     
     func moveUpward() {
         let forceMagnitude: Float = 300
         tankPhysicsBody?.applyForce(SCNVector3(0, forceMagnitude, 0), asImpulse: false)
+        playJumpSound()
+    }
+    
+    func playJumpSound(){
+        let jumpSource = SCNAudioSource(named: "woosh.mp3")
+        jumpSource?.loops = false
+        jumpSource?.volume = 0.2
+        jumpSource?.isPositional = false
+        jumpSource?.load()
+        let jumpFX = SCNAudioPlayer(source: jumpSource!)
+        addAudioPlayer(jumpFX)
     }
     
     

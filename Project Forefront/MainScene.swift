@@ -384,6 +384,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
             }
             
+            playShootSound()
+            
             // Remove line again
             removeLine()
             
@@ -405,6 +407,17 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             childNode.removeFromParentNode()
         }
     }
+    
+    func playShootSound(){
+        let shootSource = SCNAudioSource(named: "Shoot.mp3")
+        shootSource?.loops = false
+        shootSource?.volume = 0.2
+        shootSource?.isPositional = false
+        shootSource?.load()
+        let shootFX = SCNAudioPlayer(source: shootSource!)
+        rootNode.addAudioPlayer(shootFX)
+    }
+    
     ///------------------------------------------------
     
     func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
@@ -425,13 +438,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             }
             contact.nodeB.removeFromParentNode()
             
-            guard let explodeSource = SCNAudioSource(named: "explosion.mp3") else {
+            guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
                     print("Failed to load explosion.mp3")
                     return
                 }
             
             explodeSource.loops = false
-            explodeSource.volume = 1.0
+            explodeSource.volume = 0.3
             explodeSource.isPositional = false
             explodeSource.load()
             let explodeFX = SCNAudioPlayer(source: explodeSource)

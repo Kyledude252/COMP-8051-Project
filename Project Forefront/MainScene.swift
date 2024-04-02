@@ -63,7 +63,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     // shot type use for semaphore, to stop waiting if firing laser
     var shotWhiff = 0
     
-    var projectile: SCNNode?
+    //var projectile: SCNNode?
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -442,7 +442,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             return
         }
         if (!projectileShot){
+            var projectile: SCNNode?
             projectile = Projectile(from: startPoint)
+            var p1: SCNNode?
+            var p2: SCNNode?
+            p1 = Projectile(from: startPoint)
+            p2 = Projectile(from: startPoint)
 
             //Get direction of vector
             let direction = SCNVector3(endPoint.x - startPoint.x, endPoint.y - startPoint.y, 0)//endPoint.z - startPoint.z)
@@ -469,40 +474,59 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             shotLightNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.1), SCNAction.removeFromParentNode()]))
             
             projectile?.position = offsetStartingPosition
+            p1?.position = offsetStartingPosition
+            p2?.position = offsetStartingPosition
 
             //Use to remove later
             projectileStore.addChildNode(projectile!)
+            projectileStore.addChildNode(p1!)
+            projectileStore.addChildNode(p2!)
             
             //Add scalar, edit as needed, maybe add to paramter later for different shots
             let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
             
-            // Normal shot ------------------------------------------------------------
-            if(type == 1 ) {
-                // used to dampen if going to far
-                var dampingFactor: Float = 0.1
-                
-                if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY) {
-                    if (forceVector.x > forceVector.y) {
-                        dampingFactor = 15/forceVector.x
-                    } else {
-                        dampingFactor = 15/forceVector.y
-                    }
+            // used to dampen if going to far
+            var dampingFactor: Float = 0.1
+            
+            if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY) {
+                if (forceVector.x > forceVector.y) {
+                    dampingFactor = 15/forceVector.x
+                } else {
+                    dampingFactor = 15/forceVector.y
                 }
-                //Dampen if going to far
-                let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
+            }
+            //Dampen if going to far
+            let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
 
-    //            print("\nForce vector: \(forceVector) ")
-    //            print("\ndampened: \(dampenedForceVector) ")
-                
-                //Apply force to node, dampen if too much force is applied
+//            print("\nForce vector: \(forceVector) ")
+//            print("\ndampened: \(dampenedForceVector) ")
+            
+            //Apply force to node, dampen if too much force is applied
+            
+            // Normal shot w/ dampening ------------------------------------------------------------
+            if(type == 1 ) {
                 if(forceVector.x >= 15 || forceVector.y >= 15) {
                     projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
                 } else {
                     projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
                 }
-            } else if (type == 2) {
+            } else if (type == 2) { // laser
                 let laserForceVector = SCNVector3(forceVector.x * 10, forceVector.y * 10, forceVector.z)
                 projectile?.physicsBody?.applyForce(laserForceVector, asImpulse: true)
+            }  else if (type == 3) { // triple shot
+                
+                projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
+                print("Shot fired")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    p1?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
+                    print("Shot fired")
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    p2?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
+                    print("Shot fired")
+                }
+                sleep(1)
+                
             } else {
                 //just fires basic shot if no inptu for some reason
                 projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
@@ -561,6 +585,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     // sets ammo to one, can be changed later to add different ammo for different weapon types
     func giveAmmo() {
         ammunition = 1
+        print("Got ammo, Ammunition: ", ammunition)
         //update screen display
         if let textGeo = ammoNode?.geometry as? SCNText {
             textGeo.string = "shots: \(ammunition)"
@@ -569,6 +594,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     // sets ammo to 0, can be changed later
     func removeAmmo() {
         ammunition = 0
+        print("lost ammo, Ammunition: ", ammunition)
         // update screen display
         if let textGeo = ammoNode?.geometry as? SCNText {
             textGeo.string = "shots: \(ammunition)"
@@ -687,7 +713,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                         //Keep checking if projectile is still flying (go down to physics body for contact)
                         // checks if projectile completely whiffed and is fyling through the air
                         self.count+=1
-                        if (self.count == 20){
+                        if (self.count == 30){
                             self.shotWhiff = 1
                         }
                         

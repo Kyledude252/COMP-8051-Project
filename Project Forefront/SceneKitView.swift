@@ -78,7 +78,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         // shot type used to alter launch projectile
         var shotType = 1
         // array with shot types
-        let shotTypes = ["Lob","Laser", "Orignator"]
+        let shotTypes = ["Lob","Laser", "Triple"]
         
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent

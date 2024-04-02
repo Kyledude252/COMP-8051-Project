@@ -172,7 +172,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         ambientLight.light = SCNLight()
         ambientLight.light?.type = SCNLight.LightType.ambient
         ambientLight.light?.color = UIColor.white
-        ambientLight.light?.intensity = 500
+        ambientLight.light?.intensity = 700
         rootNode.addChildNode(ambientLight)
         
         let sunLight = SCNNode()
@@ -201,7 +201,14 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         let uLight = SCNNode()
         uLight.light = SCNLight()
         uLight.light?.type = SCNLight.LightType.omni
+        uLight.light?.attenuationStartDistance = 0
+        uLight.light?.attenuationEndDistance = 150
+        uLight.light?.attenuationFalloffExponent = 4
+        uLight.light?.intensity = 10000
+        uLight.light?.color = UIColor(red: 0, green: 0.1, blue: 0.7, alpha: 1)
         
+        uLight.position = SCNVector3(cameraXOffset, cameraYOffset - 50, cameraZOffset)
+        rootNode.addChildNode(uLight)
     }
     
     // PLAYER CONTROL & SWITCHING // ///////////

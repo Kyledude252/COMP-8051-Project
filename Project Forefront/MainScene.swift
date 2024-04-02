@@ -526,6 +526,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     ///------------------------------------------------
+    ///
+    
+    @IBAction func fade(_ sender: Any) {
+        
+        
+    }
     
     func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
         
@@ -538,6 +544,24 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
 
             levelNode.explode(pos: contact.nodeA.position)
+            
+            let expLightNode = SCNNode()
+            expLightNode.position = SCNVector3(x: contact.contactPoint.x, y: contact.contactPoint.y + 0.1, z: contact.contactPoint.z)
+            expLightNode.light = SCNLight()
+            expLightNode.light?.type = SCNLight.LightType.omni
+            expLightNode.light?.intensity = 100000
+            expLightNode.light?.attenuationStartDistance = 3
+            expLightNode.light?.attenuationFalloffExponent = 4
+            expLightNode.light?.attenuationEndDistance = 300
+            expLightNode.light?.color = UIColor(red: 0.96, green: 0.61, blue: 0.98, alpha: 1)
+            rootNode.addChildNode(expLightNode)
+            
+            SCNTransaction.animationDuration = 0.4
+            expLightNode.light?.intensity = 0
+        
+
+            expLightNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.5), SCNAction.removeFromParentNode()]))
+            
             let dx1 = contact.contactPoint.x - player1Tank.position.x
             let dz1 = contact.contactPoint.z - player1Tank.position.z
             let dx2 = contact.contactPoint.x - player2Tank.position.x

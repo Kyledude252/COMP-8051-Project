@@ -9,29 +9,52 @@ import Foundation
 import SwiftUI
 import SceneKit
 
-struct SceneKitView: UIViewRepresentable {
+struct SceneKitView: UIViewControllerRepresentable {
     let scene: SCNScene
     let mainSceneViewModel: MainSceneViewModel
-   
-    func makeUIView(context: Context) -> SCNView {
-        let scnView = SCNView(frame: .zero)
-        //scnView.scene = scene
-        scnView.scene = scene
-        
-        let main = mainSceneViewModel.scene
-         main.scnView = scnView
-        //firing code ---
-        //button position
-        context.coordinator.setupFireButton(on: scnView)
-        context.coordinator.setupGestureRecognizers(on: scnView)
-        
-        return scnView
+
+    
+    func makeUIViewController(context: Context) -> GameViewController {
+        let vc = GameViewController(scene: scene)
+        if (scene == mainSceneViewModel.scene) {
+            let main = mainSceneViewModel.scene
+            main.scnView = vc.view as? SCNView
+            
+            //firing code ---
+            //button position
+            context.coordinator.setupFireButton(on: vc.view as! SCNView)
+            context.coordinator.setupGestureRecognizers(on: vc.view as! SCNView)
+            context.coordinator.setupPicker(on: vc.view as! SCNView)
+        }
+        return vc
+
     }
     
-    func updateUIView(_ scnView: SCNView, context: Context) {
+    func updateUIViewController(_ uiViewController: GameViewController, context: Context) {
         // No updates needed
     }
     
+    typealias UIViewControllerType = GameViewController
+   
+//    func makeUIView(context: Context) -> SCNView {
+//        let scnView = SCNView(frame: .zero)
+//        //scnView.scene = scene
+//        scnView.scene = scene
+//        
+//        let main = mainSceneViewModel.scene
+//         main.scnView = scnView
+//        //firing code ---
+//        //button position
+//        context.coordinator.setupFireButton(on: scnView)
+//        context.coordinator.setupGestureRecognizers(on: scnView)
+//        
+//        return scnView
+//    }
+//    
+//    func updateUIView(_ scnView: SCNView, context: Context) {
+//        // No updates needed
+//    }
+//    
     
     //Makes coordinator, sends an instance
     func makeCoordinator() -> Coordinator {
@@ -40,7 +63,8 @@ struct SceneKitView: UIViewRepresentable {
     //Coordinator class, needed to handle functions from MainScene
     //without coordinator functins from main scene would apply to another instance of main scene
     // which is not veiwable with the current view
-    class Coordinator: NSObject {
+    class Coordinator: NSObject, UIPickerViewDelegate, UIPickerViewDataSource {
+        
         // Scenekit View
         var parent: SceneKitView
         // Scnview
@@ -49,10 +73,18 @@ struct SceneKitView: UIViewRepresentable {
         var toggleButton: UIButton?
         //toggle boolean for fire mode on/off
         var fireModeOn = false;
+        // used for self reference to figure out who's turn it is
+        var playerTurn: Int = 1
+        // shot type used to alter launch projectile
+        var shotType = 1
+        // array with shot types
+        let shotTypes = ["Lob","Laser", "Orignator"]
         
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
             self.mainScene = mainScene
+            //Put this bad boy here to trigger as soon as MainScene is rendered, kind of bandaid fix honestly
+            mainScene.toggleTurns()
         }
         
         //sets up gesture
@@ -76,19 +108,40 @@ struct SceneKitView: UIViewRepresentable {
                     scene.createTrajectoryLine(from: scene.getTankPosition()!, to: touchPoint)
                     
                 } else if gesture.state == .ended && fireModeOn {
-                    scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint)
-                    //toggle fire mode upon firing
-                    toggleFire() // temp
-                    
-                    // disable fire mode <-- simply toggle this later
-                    toggleButton?.isEnabled = false
-                    
-                    // for testing ---------------------------------------
-                    // add this to a turn that can be timed
-                    mainScene.toggleTurns()
+                    // Carry on variable here
+                    scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint, type: shotType)
+
                 }
             }
         }
+        
+        func setupPicker(on view: SCNView) {
+            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 100, width: 100, height: 100))
+            pickerView.delegate = self
+            pickerView.dataSource = self
+            pickerView.backgroundColor = .green
+            view.addSubview(pickerView)
+            
+        }
+        
+        func numberOfComponents(in pickerView: UIPickerView) -> Int {
+            return 1
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+            return 3
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+            return shotTypes[row]
+        }
+        
+        func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+            shotType = row + 1
+            print("shot type: ", shotType)
+        }
+        
+
         
         // Creates fire button on screen view, so it remains on screen when panning
         func setupFireButton(on view: SCNView) {
@@ -106,11 +159,17 @@ struct SceneKitView: UIViewRepresentable {
                 if button.title(for: .normal) == "Fire Mode" {
                     button.setTitle("Move Mode", for: .normal)
                     button.backgroundColor = .blue
-                    fireModeOn = false //toggles fire mode off
+                    //toggles fire mode off
+                    fireModeOn = false
+                    //removes line drawn, another safeguard to remove this artifact
+                    mainScene.removeLine()
+                    //toggle tank movement back on
+                    mainScene.toggleTankMove(move: true)
                 } else if button.title(for: .normal) == "Move Mode" {
                     button.setTitle("Fire Mode", for: .normal)
                     button.backgroundColor = .red
                     fireModeOn = true //toggles fire mode on
+                    mainScene.toggleTankMove(move: false)
                 }
             }
         }
@@ -120,6 +179,10 @@ struct SceneKitView: UIViewRepresentable {
             fireModeText()
             //does not trigger toggle fire unless fireMode is on
             mainScene.toggleFire(isFireMode: fireModeOn)
+        }
+        // doesn't need to be used
+        @objc func disableFireButton() {
+            toggleButton?.isEnabled = false
         }
     }
     

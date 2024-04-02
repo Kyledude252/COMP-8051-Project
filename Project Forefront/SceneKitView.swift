@@ -83,8 +83,6 @@ struct SceneKitView: UIViewControllerRepresentable {
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
             self.mainScene = mainScene
-            //Put this bad boy here to trigger as soon as MainScene is rendered, kind of bandaid fix honestly
-            mainScene.toggleTurns()
         }
         
         //sets up gesture

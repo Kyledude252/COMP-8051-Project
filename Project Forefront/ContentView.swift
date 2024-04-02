@@ -49,6 +49,7 @@ struct ContentView: View {
                 .onAppear {
                     mainSceneViewModel.scene.toggleGameStarted = {
                         // reset - don't return
+                        
                         mainSceneViewModel.resetScene()
                         isGameStarted = false
                         isMovingLeft = false
@@ -181,6 +182,8 @@ struct ContentView: View {
         } else {
             StartScreenView(startAction: {
                 isGameStarted = true
+                //yolo start toggling
+                mainSceneViewModel.scene.toggleTurns()
             }, statsAction: {
                 statsSceneViewModel.updateStats()
                 statsScreenOpen = true

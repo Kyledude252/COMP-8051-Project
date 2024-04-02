@@ -422,11 +422,11 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             shotLightNode.position = offsetStartingPosition
             shotLightNode.light = SCNLight()
             shotLightNode.light?.type = SCNLight.LightType.omni
-            shotLightNode.light?.intensity = 50000
-            shotLightNode.light?.attenuationStartDistance = 0
+            shotLightNode.light?.intensity = 100000
+            shotLightNode.light?.attenuationStartDistance = 3
             shotLightNode.light?.attenuationFalloffExponent = 4
-            shotLightNode.light?.attenuationEndDistance = 13
-            shotLightNode.light?.color = UIColor(red: 0.95, green: 0.9, blue: 0.6, alpha: 1)
+            shotLightNode.light?.attenuationEndDistance = 15
+            shotLightNode.light?.color = UIColor(red: 0.95, green: 0.9, blue: 0.5, alpha: 1)
             rootNode.addChildNode(shotLightNode)
             
             shotLightNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.1), SCNAction.removeFromParentNode()]))

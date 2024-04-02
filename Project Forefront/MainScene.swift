@@ -199,8 +199,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         rootNode.addChildNode(sunLight)
         
         let uLight = SCNNode()
-        uLight = SCNLight()
+        uLight.light = SCNLight()
         uLight.light?.type = SCNLight.LightType.omni
+        
     }
     
     // PLAYER CONTROL & SWITCHING // ///////////

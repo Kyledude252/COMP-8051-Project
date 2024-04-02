@@ -558,10 +558,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
 
             levelNode.explode(pos: contact.nodeA.position)
-            let dx1 = contact.contactPoint.x - player1Tank.position.x
-            let dz1 = contact.contactPoint.z - player1Tank.position.z
-            let dx2 = contact.contactPoint.x - player2Tank.position.x
-            let dz2 = contact.contactPoint.z - player2Tank.position.z
+            let dx1 = contact.contactPoint.x - player1Tank.presentation.worldPosition.x
+            let dz1 = contact.contactPoint.z - player1Tank.presentation.worldPosition.z
+            let dx2 = contact.contactPoint.x - player2Tank.presentation.worldPosition.x
+            let dz2 = contact.contactPoint.z - player2Tank.presentation.worldPosition.z
             if(sqrt(dx1*dx1+dz1+dz1) < 5 && contact.nodeB.parent != nil){
                 //NOTE distance is set to 5 to line up with explosion side of 10, since the level blocks are 0.5 scale. If we have different explosion sizes or change the scale of the cubes the distance here should be explosionSize*LevelCubeScale. Something to change later when we make different explosives with different sizes and figure out that system.
                 player1Tank.decreaseHealth(damage: 10)

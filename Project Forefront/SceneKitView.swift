@@ -9,30 +9,52 @@ import Foundation
 import SwiftUI
 import SceneKit
 
-struct SceneKitView: UIViewRepresentable {
+struct SceneKitView: UIViewControllerRepresentable {
     let scene: SCNScene
     let mainSceneViewModel: MainSceneViewModel
-   
-    func makeUIView(context: Context) -> SCNView {
-        let scnView = SCNView(frame: .zero)
-        //scnView.scene = scene
-        scnView.scene = scene
-        
-        let main = mainSceneViewModel.scene
-         main.scnView = scnView
-        //firing code ---
-        //button position
-        context.coordinator.setupFireButton(on: scnView)
-        context.coordinator.setupGestureRecognizers(on: scnView)
-        context.coordinator.setupPicker(on: scnView)
-        
-        return scnView
+
+    
+    func makeUIViewController(context: Context) -> GameViewController {
+        let vc = GameViewController(scene: scene)
+        if (scene == mainSceneViewModel.scene) {
+            let main = mainSceneViewModel.scene
+            main.scnView = vc.view as? SCNView
+            
+            //firing code ---
+            //button position
+            context.coordinator.setupFireButton(on: vc.view as! SCNView)
+            context.coordinator.setupGestureRecognizers(on: vc.view as! SCNView)
+            context.coordinator.setupPicker(on: vc.view as! SCNView)
+        }
+        return vc
+
     }
     
-    func updateUIView(_ scnView: SCNView, context: Context) {
+    func updateUIViewController(_ uiViewController: GameViewController, context: Context) {
         // No updates needed
     }
     
+    typealias UIViewControllerType = GameViewController
+   
+//    func makeUIView(context: Context) -> SCNView {
+//        let scnView = SCNView(frame: .zero)
+//        //scnView.scene = scene
+//        scnView.scene = scene
+//        
+//        let main = mainSceneViewModel.scene
+//         main.scnView = scnView
+//        //firing code ---
+//        //button position
+//        context.coordinator.setupFireButton(on: scnView)
+//        context.coordinator.setupGestureRecognizers(on: scnView)
+//        
+//        return scnView
+//    }
+//    
+//    func updateUIView(_ scnView: SCNView, context: Context) {
+//        // No updates needed
+//    }
+//    
     
     //Makes coordinator, sends an instance
     func makeCoordinator() -> Coordinator {

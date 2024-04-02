@@ -11,12 +11,15 @@
 		3650F06F2B6AEE780076D527 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3650F06E2B6AEE780076D527 /* ContentView.swift */; };
 		3650F0712B6AEE7A0076D527 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3650F0702B6AEE7A0076D527 /* Assets.xcassets */; };
 		3650F0742B6AEE7A0076D527 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3650F0732B6AEE7A0076D527 /* Preview Assets.xcassets */; };
+		5804254F2BB8C55F000C5FD1 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5804254E2BB8C55F000C5FD1 /* GameViewController.swift */; };
+		589E76D12BBA16EF0056C2B2 /* StatsScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589E76D02BBA16EF0056C2B2 /* StatsScene.swift */; };
+		589E76D32BBA1FDF0056C2B2 /* StatsSceneViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589E76D22BBA1FDF0056C2B2 /* StatsSceneViewModel.swift */; };
 		CECB836F2B7C279C00BF993D /* SceneKitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECB836E2B7C279C00BF993D /* SceneKitView.swift */; };
 		CECB83712B7C28DA00BF993D /* MainScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECB83702B7C28DA00BF993D /* MainScene.swift */; };
 		CECB83732B7C3B3900BF993D /* MainSceneViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECB83722B7C3B3900BF993D /* MainSceneViewModel.swift */; };
 		CECC0F392B980B4D00EA0F02 /* PhysicsCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = CECC0F382B980B4D00EA0F02 /* PhysicsCategory.swift */; };
 		CED7B1AD2BB7BDA800E71297 /* Projectile.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED7B1AC2BB7BDA800E71297 /* Projectile.swift */; };
-		CED7B1EB2BB8A98900E71297 /* 14077_WWII_Tank_Germany_Panzer_III_v1_L2.obj in Resources */ = {isa = PBXBuildFile; fileRef = CED7B1EA2BB8A98900E71297 /* 14077_WWII_Tank_Germany_Panzer_III_v1_L2.obj */; };
+		CED7B1ED2BBA599400E71297 /* background-612x612.jpg in Resources */ = {isa = PBXBuildFile; fileRef = CED7B1EC2BBA599400E71297 /* background-612x612.jpg */; };
 		CEE97D0E2B8F8F37002F0962 /* Level.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE97D0D2B8F8F37002F0962 /* Level.swift */; };
 		CEE97D102B8FD052002F0962 /* LevelSquare.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE97D0F2B8FD052002F0962 /* LevelSquare.swift */; };
 		CEFFD4D62B7CFC9C0027C549 /* Tank.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFFD4D52B7CFC9C0027C549 /* Tank.swift */; };
@@ -28,12 +31,15 @@
 		3650F06E2B6AEE780076D527 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3650F0702B6AEE7A0076D527 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3650F0732B6AEE7A0076D527 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		5804254E2BB8C55F000C5FD1 /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
+		589E76D02BBA16EF0056C2B2 /* StatsScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsScene.swift; sourceTree = "<group>"; };
+		589E76D22BBA1FDF0056C2B2 /* StatsSceneViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsSceneViewModel.swift; sourceTree = "<group>"; };
 		CECB836E2B7C279C00BF993D /* SceneKitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneKitView.swift; sourceTree = "<group>"; };
 		CECB83702B7C28DA00BF993D /* MainScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainScene.swift; sourceTree = "<group>"; };
 		CECB83722B7C3B3900BF993D /* MainSceneViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSceneViewModel.swift; sourceTree = "<group>"; };
 		CECC0F382B980B4D00EA0F02 /* PhysicsCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicsCategory.swift; sourceTree = "<group>"; };
 		CED7B1AC2BB7BDA800E71297 /* Projectile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Projectile.swift; sourceTree = "<group>"; };
-		CED7B1EA2BB8A98900E71297 /* 14077_WWII_Tank_Germany_Panzer_III_v1_L2.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 14077_WWII_Tank_Germany_Panzer_III_v1_L2.obj; sourceTree = "<group>"; };
+		CED7B1EC2BBA599400E71297 /* background-612x612.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "background-612x612.jpg"; sourceTree = "<group>"; };
 		CEE97D0D2B8F8F37002F0962 /* Level.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Level.swift; sourceTree = "<group>"; };
 		CEE97D0F2B8FD052002F0962 /* LevelSquare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelSquare.swift; sourceTree = "<group>"; };
 		CEFFD4D52B7CFC9C0027C549 /* Tank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tank.swift; sourceTree = "<group>"; };
@@ -70,18 +76,21 @@
 			isa = PBXGroup;
 			children = (
 				3650F06C2B6AEE780076D527 /* Project_ForefrontApp.swift */,
+				5804254E2BB8C55F000C5FD1 /* GameViewController.swift */,
 				3650F06E2B6AEE780076D527 /* ContentView.swift */,
 				CECB83722B7C3B3900BF993D /* MainSceneViewModel.swift */,
 				CECB836E2B7C279C00BF993D /* SceneKitView.swift */,
+				589E76D02BBA16EF0056C2B2 /* StatsScene.swift */,
 				CECB83702B7C28DA00BF993D /* MainScene.swift */,
+				CED7B1EC2BBA599400E71297 /* background-612x612.jpg */,
 				CED7B1AC2BB7BDA800E71297 /* Projectile.swift */,
 				CEFFD4D52B7CFC9C0027C549 /* Tank.swift */,
-				CED7B1EA2BB8A98900E71297 /* 14077_WWII_Tank_Germany_Panzer_III_v1_L2.obj */,
 				CEE97D0D2B8F8F37002F0962 /* Level.swift */,
 				CECC0F382B980B4D00EA0F02 /* PhysicsCategory.swift */,
 				CEE97D0F2B8FD052002F0962 /* LevelSquare.swift */,
 				3650F0702B6AEE7A0076D527 /* Assets.xcassets */,
 				3650F0722B6AEE7A0076D527 /* Preview Content */,
+				589E76D22BBA1FDF0056C2B2 /* StatsSceneViewModel.swift */,
 			);
 			path = "Project Forefront";
 			sourceTree = "<group>";
@@ -153,8 +162,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				3650F0742B6AEE7A0076D527 /* Preview Assets.xcassets in Resources */,
-				CED7B1EB2BB8A98900E71297 /* 14077_WWII_Tank_Germany_Panzer_III_v1_L2.obj in Resources */,
 				3650F0712B6AEE7A0076D527 /* Assets.xcassets in Resources */,
+				CED7B1ED2BBA599400E71297 /* background-612x612.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,14 +174,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5804254F2BB8C55F000C5FD1 /* GameViewController.swift in Sources */,
 				CED7B1AD2BB7BDA800E71297 /* Projectile.swift in Sources */,
 				3650F06F2B6AEE780076D527 /* ContentView.swift in Sources */,
+				589E76D12BBA16EF0056C2B2 /* StatsScene.swift in Sources */,
 				CEFFD4D62B7CFC9C0027C549 /* Tank.swift in Sources */,
 				CEE97D0E2B8F8F37002F0962 /* Level.swift in Sources */,
 				CECC0F392B980B4D00EA0F02 /* PhysicsCategory.swift in Sources */,
 				CECB83712B7C28DA00BF993D /* MainScene.swift in Sources */,
 				3650F06D2B6AEE780076D527 /* Project_ForefrontApp.swift in Sources */,
 				CEE97D102B8FD052002F0962 /* LevelSquare.swift in Sources */,
+				589E76D32BBA1FDF0056C2B2 /* StatsSceneViewModel.swift in Sources */,
 				CECB836F2B7C279C00BF993D /* SceneKitView.swift in Sources */,
 				CECB83732B7C3B3900BF993D /* MainSceneViewModel.swift in Sources */,
 			);

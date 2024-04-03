@@ -7,16 +7,21 @@
 
 import Foundation
 import SceneKit
+import SpriteKit
 
 class Projectile: SCNNode {
     
     init(from startPoint: SCNVector3) {
+        
         super.init()
         
         // Basic setup
         let projectileGeometry = SCNSphere(radius: 0.3)
         let projectileMaterial = SCNMaterial()
         projectileGeometry.materials = [projectileMaterial]
+        
+        
+        
         
         // Add collision setup here - For destroy or effect TODO
         

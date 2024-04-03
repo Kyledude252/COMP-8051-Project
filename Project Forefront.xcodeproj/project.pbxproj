@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A84CA9A2BBCC8A700BF1CE1 /* trail.png in Resources */ = {isa = PBXBuildFile; fileRef = 0A84CA992BBCC8A700BF1CE1 /* trail.png */; };
 		3650F06D2B6AEE780076D527 /* Project_ForefrontApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3650F06C2B6AEE780076D527 /* Project_ForefrontApp.swift */; };
 		3650F06F2B6AEE780076D527 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3650F06E2B6AEE780076D527 /* ContentView.swift */; };
 		3650F0712B6AEE7A0076D527 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3650F0702B6AEE7A0076D527 /* Assets.xcassets */; };
@@ -31,6 +32,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0A84CA992BBCC8A700BF1CE1 /* trail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trail.png; sourceTree = "<group>"; };
 		3650F0692B6AEE780076D527 /* Project Forefront.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Project Forefront.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3650F06C2B6AEE780076D527 /* Project_ForefrontApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project_ForefrontApp.swift; sourceTree = "<group>"; };
 		3650F06E2B6AEE780076D527 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 				CECC0F382B980B4D00EA0F02 /* PhysicsCategory.swift */,
 				CEE97D0F2B8FD052002F0962 /* LevelSquare.swift */,
 				3650F0702B6AEE7A0076D527 /* Assets.xcassets */,
+				0A84CA992BBCC8A700BF1CE1 /* trail.png */,
 				36D638502BBA699700B8913C /* Audio */,
 				3650F0722B6AEE7A0076D527 /* Preview Content */,
 				589E76D22BBA1FDF0056C2B2 /* StatsSceneViewModel.swift */,
@@ -184,10 +187,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A84CA9A2BBCC8A700BF1CE1 /* trail.png in Resources */,
 				36D6385A2BBBCCD500B8913C /* TankMoving.mp3 in Resources */,
 				3650F0742B6AEE7A0076D527 /* Preview Assets.xcassets in Resources */,
 				36D638602BBBD1D300B8913C /* explosion.wav in Resources */,
-				CED7B1EB2BB8A98900E71297 /* 14077_WWII_Tank_Germany_Panzer_III_v1_L2.obj in Resources */,
 				36D6385E2BBBD06200B8913C /* Shoot.mp3 in Resources */,
 				36D6384F2BBA697300B8913C /* BGSong.mp3 in Resources */,
 				3650F0712B6AEE7A0076D527 /* Assets.xcassets in Resources */,

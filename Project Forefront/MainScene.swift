@@ -443,7 +443,30 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
         if (!projectileShot){
             projectile = Projectile(from: startPoint)
-
+            
+            let pTrail = SCNParticleSystem()
+            pTrail.emitterShape = SCNSphere(radius: 0.1)
+            pTrail.emissionDuration = 1.0
+            pTrail.loops = true
+            pTrail.idleDuration = 0
+            pTrail.birthLocation = SCNParticleBirthLocation.volume
+            pTrail.birthRate = 100
+            pTrail.particleSize = 0.0
+            
+            
+            projectile?.addParticleSystem(pTrail)
+            
+            // use for laser
+            let anim1 = CABasicAnimation()
+            anim1.fromValue = 0.5
+            anim1.toValue = 0.0
+            anim1.duration = 1.6
+            anim1.repeatCount = 0
+            anim1.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+            let shrinkCtrl = SCNParticlePropertyController(animation: anim1)            
+            
+            pTrail.propertyControllers = [ SCNParticleSystem.ParticleProperty.size: shrinkCtrl ]
+            
             //Get direction of vector
             let direction = SCNVector3(endPoint.x - startPoint.x, endPoint.y - startPoint.y, 0)//endPoint.z - startPoint.z)
             
@@ -776,7 +799,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             self.turnEnded = false
             // delete projectile nodes
             self.deleteProjectiles()
-            //toggle palyer control
+            //toggle player control
             if (player == 1){
                 self.activePlayer = 2
             } else {

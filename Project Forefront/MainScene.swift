@@ -226,8 +226,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         uLight.light?.type = SCNLight.LightType.omni
         uLight.light?.attenuationStartDistance = 320
         uLight.light?.attenuationEndDistance = 380
-        uLight.light?.attenuationFalloffExponent = 2
-        uLight.light?.intensity = 100000
+        uLight.light?.attenuationFalloffExponent = 1.8
+        uLight.light?.intensity = 200000
         uLight.light?.color = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1)
         
         uLight.position = SCNVector3(cameraXOffset, cameraYOffset - 370, cameraZOffset+50)

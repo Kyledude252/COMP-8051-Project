@@ -115,7 +115,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     // GRAPHICS // //////
     @MainActor
     func firstUpdate() {
-        setupAudio()
         tankMovement() // Call reanimate on the first graphics update frame
     }
     
@@ -136,19 +135,23 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     func setupAudio(){
         
-        guard let BGSource = SCNAudioSource(named: "BGSong.mp3") else {
-                print("Failed to load BGSong.mp3")
-                return
-            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            guard let BGSource = SCNAudioSource(named: "BGSong.mp3") else {
+                    print("Failed to load BGSong.mp3")
+                    return
+                }
+            
+            //let BGSource = SCNAudioSource(named: "BGSong.mp3")!
+            BGSource.loops = true
+            BGSource.volume = 0.5
+            BGSource.isPositional = false
+            BGSource.load()
+            let BGSong = SCNAudioPlayer(source: BGSource)
+            self.rootNode.addAudioPlayer(BGSong)
+            print("ADDED SONG")
+        }
         
-        //let BGSource = SCNAudioSource(named: "BGSong.mp3")!
-        BGSource.loops = true
-        BGSource.volume = 1.0
-        BGSource.isPositional = false
-        BGSource.load()
-        let BGSong = SCNAudioPlayer(source: BGSource)
-        rootNode.addAudioPlayer(BGSong)
-        print("ADDED SONG")
+        
     }
     
     

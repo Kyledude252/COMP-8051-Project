@@ -224,13 +224,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         let uLight = SCNNode()
         uLight.light = SCNLight()
         uLight.light?.type = SCNLight.LightType.omni
-        uLight.light?.attenuationStartDistance = 0
-        uLight.light?.attenuationEndDistance = 150
-        uLight.light?.attenuationFalloffExponent = 4
-        uLight.light?.intensity = 10000
-        uLight.light?.color = UIColor(red: 0, green: 0.1, blue: 0.7, alpha: 1)
+        uLight.light?.attenuationStartDistance = 320
+        uLight.light?.attenuationEndDistance = 380
+        uLight.light?.attenuationFalloffExponent = 1.8
+        uLight.light?.intensity = 200000
+        uLight.light?.color = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1)
         
-        uLight.position = SCNVector3(cameraXOffset, cameraYOffset - 50, cameraZOffset)
+        uLight.position = SCNVector3(cameraXOffset, cameraYOffset - 370, cameraZOffset+50)
         rootNode.addChildNode(uLight)
     }
     

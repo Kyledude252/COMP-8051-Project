@@ -26,7 +26,7 @@ class Level: SCNNode {
     // COLORS
     let lightBrown = UIColor(red: 210/255, green: 180/255, blue: 140/255, alpha: 1.0)
     let darkBrown = UIColor(red: 0.545, green: 0.271, blue: 0.075, alpha: 1.0)
-    let blockColourTealGrey = UIColor(red: 50/255, green: 85/255, blue: 100/255, alpha: 1.0)
+    let blockColourTealGrey = UIColor(red: 27/255, green: 55/255, blue: 70/255, alpha: 1.0)
 
     let blockColourTealSurface = UIColor(red: 100/255, green: 125/255, blue: 150/255, alpha: 1.0)
 

@@ -612,20 +612,22 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 let forceMagnitude: Float = 60
                 player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
             }
-            contact.nodeB.removeFromParentNode()
-            
-            guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
+            if(contact.nodeB.parent != nil){
+                guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
                     print("Failed to load explosion.mp3")
                     return
                 }
+                
+                explodeSource.loops = false
+                explodeSource.volume = 0.3
+                explodeSource.isPositional = false
+                explodeSource.load()
+                let explodeFX = SCNAudioPlayer(source: explodeSource)
+                rootNode.addAudioPlayer(explodeFX)
+                print("ADDED EXPLOSION")
+            }
             
-            explodeSource.loops = false
-            explodeSource.volume = 0.3
-            explodeSource.isPositional = false
-            explodeSource.load()
-            let explodeFX = SCNAudioPlayer(source: explodeSource)
-            rootNode.addAudioPlayer(explodeFX)
-            print("ADDED EXPLOSION")
+            contact.nodeB.removeFromParentNode()
             
         }else if contactMask == (PhysicsCategory.tank | PhysicsCategory.projectile){
             //Tank specific collision if we do that

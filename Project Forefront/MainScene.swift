@@ -131,6 +131,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     func updateCameraPosition(cameraXOffset: Float, cameraYOffset: Float) {
         //cameraNode.position = SCNVector3(cameraXOffset, cameraYOffset, cameraZOffset)
+        print("updateCameraPos called")
     }
     
     func setupAudio(){
@@ -684,6 +685,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
     var count = 0
     func toggleTurns() {
+        print("toggleTurns called")
         let player: Int
         if (activePlayer == 1){
             player = 1

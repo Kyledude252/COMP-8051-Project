@@ -22,7 +22,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var movementPlayerSteps = 1
     var maxMovementPlayerSteps = 10 //TODO /TURNS
     let levelWidth: CGFloat = 100
-    let levelHeight: CGFloat = 30
+    let levelHeight: CGFloat = 28
     var playerBoostCount = 5;
     
     var toggleGameStarted: (() -> Void)? // callback for reset
@@ -130,8 +130,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
     
     func updateCameraPosition(cameraXOffset: Float, cameraYOffset: Float) {
+        //cameraNode.position = SCNVector3(cameraXOffset, cameraYOffset, cameraZOffset)
         print("updateCameraPos called")
-        cameraNode.position = SCNVector3(cameraXOffset, cameraYOffset, cameraZOffset)
     }
     
     func setupAudio(){

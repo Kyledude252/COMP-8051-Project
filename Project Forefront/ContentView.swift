@@ -184,6 +184,8 @@ struct ContentView: View {
                 isGameStarted = true
                 //yolo start toggling
                 mainSceneViewModel.scene.toggleTurns()
+                
+                mainSceneViewModel.scene.setupAudio()
             }, statsAction: {
                 statsSceneViewModel.updateStats()
                 statsScreenOpen = true

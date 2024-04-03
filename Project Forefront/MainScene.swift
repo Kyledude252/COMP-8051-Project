@@ -663,8 +663,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 player2Tank.decreaseHealth(damage: self.damage)
                 let forceMagnitude: Float = 60
                 player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                
             }
             if(contact.nodeB.parent != nil){
+                
+                checkDeadCondition()
+                
                 guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
                     print("Failed to load explosion.mp3")
                     return
@@ -685,6 +689,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             //Tank specific collision if we do that
 
         }
+        
 
     }
     

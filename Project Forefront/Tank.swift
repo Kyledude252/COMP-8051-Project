@@ -34,6 +34,7 @@ class Tank: SCNNode {
         healthBar.geometry = healthNumbers
         healthBar.scale = SCNVector3(0.2, 0.2, 0.2)
         healthBar.position = SCNVector3(-4, 1, 0)
+        healthNumbers.firstMaterial?.diffuse.contents = UIColor.black
         
         self.addChildNode(healthBar)
         setupPhysics()
@@ -117,6 +118,7 @@ class Tank: SCNNode {
         
         
         let healthNumbers = SCNText(string: String(format: "%d/%d", health, maxHealth), extrusionDepth: 0.0)
+        healthNumbers.firstMaterial?.diffuse.contents = UIColor.black
         
 
         healthBar.geometry = healthNumbers

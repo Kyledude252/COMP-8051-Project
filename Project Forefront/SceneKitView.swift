@@ -114,7 +114,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         }
         
         func setupPicker(on view: SCNView) {
-            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 70, width: 100, height: 100))
+            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 70, width: 100, height: 60))
             pickerView.delegate = self
             pickerView.dataSource = self
             pickerView.backgroundColor = .green

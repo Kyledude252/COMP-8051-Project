@@ -123,7 +123,7 @@ struct ContentView: View {
                 Spacer(minLength: 5)
                 HStack(spacing: 5) {
                     ForEach(0..<2, id: \.self) { row in
-                        VStack(spacing: 5) {
+                        VStack(spacing: 2) {
                             ForEach((0..<5).reversed(), id: \.self) { column in
                                 let index = row * 5 + column
                                 Circle()
@@ -134,7 +134,7 @@ struct ContentView: View {
                     }
                 }
                 Spacer(minLength: 200)
-                VStack(spacing: 5) {
+                VStack(spacing: 2) {
                     ForEach((0..<totalBoosts).reversed(), id: \.self) { index in
                         Circle()
                             .fill(index < mainSceneViewModel.playerBoostCount ? Color.green : Color.red)
@@ -157,7 +157,7 @@ struct ContentView: View {
 
                 // turn end
                 Button(action: mainSceneViewModel.endTurn) {
-                    Text("TurnEnd").frame(maxWidth: .infinity, minHeight: 80)
+                    Text("TurnEnd").frame(maxWidth: .infinity, minHeight: 60)
                 }.buttonStyle(ButtonTap())
             }
 

@@ -11,7 +11,7 @@ import SceneKit
 class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
-    var cameraYOffset: Float = -3
+    var cameraYOffset: Float = -2.5
     var cameraZOffset: Float = 35
     
     var player1Tank: Tank!
@@ -22,12 +22,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var movementPlayerSteps = 1
     var maxMovementPlayerSteps = 10 //TODO /TURNS
     let levelWidth: CGFloat = 100
-    let levelHeight: CGFloat = 28
+    let levelHeight: CGFloat = 38
     var playerBoostCount = 5;
     
     var toggleGameStarted: (() -> Void)? // callback for reset
     
-    var groundPosition: CGFloat = 5
+    var groundPosition: CGFloat = 15
     
     var levelNode = Level(levelWidth: 1, levelHeight: 1)
     
@@ -368,6 +368,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             UserDefaults.standard.set(player2Wins, forKey: "Player2Wins")
 
             winText = SCNText(string: "Player 2 Wins!", extrusionDepth: 0.0)
+            winText.font = UIFont.systemFont(ofSize: 3)
             winText.firstMaterial = textMaterial
             winNode.geometry = winText
             rootNode.addChildNode(winNode)
@@ -383,6 +384,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             player1Wins += 1
             UserDefaults.standard.setValue(player1Wins, forKey: "Player1Wins")
             winText = SCNText(string: "Player 1 Wins!", extrusionDepth: 0.0)
+            winText.font = UIFont.systemFont(ofSize: 3)
+
             winText.firstMaterial = textMaterial
             winNode.geometry = winText
             rootNode.addChildNode(winNode)
@@ -776,9 +779,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 }
                 DispatchQueue.main.async {
                     let countdownText = SCNText(string: "\(i)", extrusionDepth: 0.0)
+                    countdownText.font = UIFont.systemFont(ofSize: 5)
                     countdownText.firstMaterial = textMaterial
                     countdownNode = SCNNode(geometry: countdownText)
-                    countdownNode!.position = SCNVector3(-35, -10, 1)
+                    countdownNode!.position = SCNVector3(36, 10, 1)
                     self.rootNode.addChildNode(countdownNode!)
                     //print("Countdown: \(i)")
                     //player stuff to determine who's turn it is
@@ -786,7 +790,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     winText.font = UIFont.systemFont(ofSize: 5)
                     winNode = SCNNode(geometry: winText)
                     self.rootNode.addChildNode(winNode!)
-                    winNode!.position = SCNVector3(-35, 1, 1)
+                    winNode!.position = SCNVector3(-14, 7, 1)
                     //print("Player \(player) turn")
                 }
                 // Wait for projectile

@@ -157,7 +157,7 @@ struct ContentView: View {
 
                 // turn end
                 Button(action: mainSceneViewModel.endTurn) {
-                    Text("TurnEnd").frame(maxWidth: .infinity, minHeight: 60)
+                    Text("End Turn").frame(maxWidth: .infinity, minHeight: 60)
                 }.buttonStyle(ButtonTap())
             }
 

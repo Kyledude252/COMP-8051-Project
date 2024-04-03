@@ -147,7 +147,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             //let BGSource = SCNAudioSource(named: "BGSong.mp3")!
             BGSource.loops = true
-            BGSource.volume = 0.5
+            BGSource.volume = 0.3
             BGSource.isPositional = false
             BGSource.load()
             let BGSong = SCNAudioPlayer(source: BGSource)
@@ -368,6 +368,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             UserDefaults.standard.set(player2Wins, forKey: "Player2Wins")
 
             winText = SCNText(string: "Player 2 Wins!", extrusionDepth: 0.0)
+            winText.firstMaterial?.diffuse.contents = UIColor.black
             winText.font = UIFont.systemFont(ofSize: 3)
             winText.firstMaterial = textMaterial
             winNode.geometry = winText
@@ -384,6 +385,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             player1Wins += 1
             UserDefaults.standard.setValue(player1Wins, forKey: "Player1Wins")
             winText = SCNText(string: "Player 1 Wins!", extrusionDepth: 0.0)
+            winText.firstMaterial?.diffuse.contents = UIColor.black
             winText.font = UIFont.systemFont(ofSize: 3)
 
             winText.firstMaterial = textMaterial
@@ -787,6 +789,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     //print("Countdown: \(i)")
                     //player stuff to determine who's turn it is
                     let winText = SCNText(string: "Player \(player) turn", extrusionDepth: 0.0)
+                    winText.firstMaterial?.diffuse.contents = UIColor.black
                     winText.font = UIFont.systemFont(ofSize: 5)
                     winNode = SCNNode(geometry: winText)
                     self.rootNode.addChildNode(winNode!)
@@ -873,6 +876,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     self.canMove = false
                     
                     let swapText = SCNText(string: "Passing Control to Player \(self.activePlayer) in \(i)", extrusionDepth: 0.0)
+                    swapText.firstMaterial?.diffuse.contents = UIColor.black
                     swapText.font = UIFont.systemFont(ofSize: 5)
                     swapNode = SCNNode(geometry: swapText)
                     self.rootNode.addChildNode(swapNode!)

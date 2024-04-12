@@ -11,7 +11,7 @@ import SceneKit
 class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
-    var cameraYOffset: Float = -3
+    var cameraYOffset: Float = -2.5
     var cameraZOffset: Float = 35
     
     var player1Tank: Tank!
@@ -22,12 +22,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var movementPlayerSteps = 1
     var maxMovementPlayerSteps = 10 //TODO /TURNS
     let levelWidth: CGFloat = 100
-    let levelHeight: CGFloat = 30
+    let levelHeight: CGFloat = 38
     var playerBoostCount = 5;
     
     var toggleGameStarted: (() -> Void)? // callback for reset
     
-    var groundPosition: CGFloat = 5
+    var groundPosition: CGFloat = 15
     
     var levelNode = Level(levelWidth: 1, levelHeight: 1)
     
@@ -54,6 +54,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var canMove: Bool = true
     // used for freezing movement during turn transition
     var moveFlag: Bool = true
+    // Pause pressed
+    var pauseOn: Bool = false
+    // pause semaphore
+    let pauseSem = DispatchSemaphore(value: 0)
     // used to check if turnEnd button is clicked
     var turnEnded: Bool = false
     // turn time
@@ -64,8 +68,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     let semaphore = DispatchSemaphore(value: 0)
     // shot type use for semaphore, to stop waiting if firing laser
     var shotWhiff = 0
+    // explosion radius
+    var explosionRadius = 10
+    // Damage taken from shot
+    var damage = 10
     
-    var projectile: SCNNode?
+    //var projectile: SCNNode?
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -117,7 +125,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     // GRAPHICS // //////
     @MainActor
     func firstUpdate() {
-        setupAudio()
         tankMovement() // Call reanimate on the first graphics update frame
     }
     
@@ -132,24 +139,29 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
     
     func updateCameraPosition(cameraXOffset: Float, cameraYOffset: Float) {
-        cameraNode.position = SCNVector3(cameraXOffset, cameraYOffset, cameraZOffset)
+        //cameraNode.position = SCNVector3(cameraXOffset, cameraYOffset, cameraZOffset)
+        print("updateCameraPos called")
     }
     
     func setupAudio(){
         
-        guard let BGSource = SCNAudioSource(named: "BGSong.mp3") else {
-                print("Failed to load BGSong.mp3")
-                return
-            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            guard let BGSource = SCNAudioSource(named: "BGSong.mp3") else {
+                    print("Failed to load BGSong.mp3")
+                    return
+                }
+            
+            //let BGSource = SCNAudioSource(named: "BGSong.mp3")!
+            BGSource.loops = true
+            BGSource.volume = 0.3
+            BGSource.isPositional = false
+            BGSource.load()
+            let BGSong = SCNAudioPlayer(source: BGSource)
+            self.rootNode.addAudioPlayer(BGSong)
+            print("ADDED SONG")
+        }
         
-        //let BGSource = SCNAudioSource(named: "BGSong.mp3")!
-        BGSource.loops = true
-        BGSource.volume = 1.0
-        BGSource.isPositional = false
-        BGSource.load()
-        let BGSong = SCNAudioPlayer(source: BGSource)
-        rootNode.addAudioPlayer(BGSong)
-        print("ADDED SONG")
+        
     }
     
     
@@ -225,13 +237,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         let uLight = SCNNode()
         uLight.light = SCNLight()
         uLight.light?.type = SCNLight.LightType.omni
-        uLight.light?.attenuationStartDistance = 0
-        uLight.light?.attenuationEndDistance = 150
-        uLight.light?.attenuationFalloffExponent = 4
-        uLight.light?.intensity = 10000
-        uLight.light?.color = UIColor(red: 0, green: 0.1, blue: 0.7, alpha: 1)
+        uLight.light?.attenuationStartDistance = 320
+        uLight.light?.attenuationEndDistance = 380
+        uLight.light?.attenuationFalloffExponent = 1.8
+        uLight.light?.intensity = 200000
+        uLight.light?.color = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1)
         
-        uLight.position = SCNVector3(cameraXOffset, cameraYOffset - 50, cameraZOffset)
+        uLight.position = SCNVector3(cameraXOffset, cameraYOffset - 370, cameraZOffset+50)
         rootNode.addChildNode(uLight)
     }
     
@@ -362,6 +374,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             UserDefaults.standard.set(player2Wins, forKey: "Player2Wins")
 
             winText = SCNText(string: "Player 2 Wins!", extrusionDepth: 0.0)
+            winText.firstMaterial?.diffuse.contents = UIColor.black
+            winText.font = UIFont.systemFont(ofSize: 3)
             winText.firstMaterial = textMaterial
             winNode.geometry = winText
             rootNode.addChildNode(winNode)
@@ -377,6 +391,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             player1Wins += 1
             UserDefaults.standard.setValue(player1Wins, forKey: "Player1Wins")
             winText = SCNText(string: "Player 1 Wins!", extrusionDepth: 0.0)
+            winText.firstMaterial?.diffuse.contents = UIColor.black
+            winText.font = UIFont.systemFont(ofSize: 3)
+
             winText.firstMaterial = textMaterial
             winNode.geometry = winText
             rootNode.addChildNode(winNode)
@@ -444,6 +461,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             return
         }
         if (!projectileShot){
+            var projectile: SCNNode?
             projectile = Projectile(from: startPoint)
 
             //Get direction of vector
@@ -451,7 +469,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             // need offset to avoid physics
             // might need to edit this value later to change interactions
-            let offsetFactor: Float = 0.02
+            let offsetFactor: Float = 0.06
             let offsetStartingPosition = SCNVector3(startPoint.x + (direction.x * offsetFactor), startPoint.y + (direction.y * offsetFactor), startPoint.z + direction.z * offsetFactor)
             
             let lightOffsetFactor: Float = 0.01
@@ -478,33 +496,56 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             //Add scalar, edit as needed, maybe add to paramter later for different shots
             let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
             
-            // Normal shot ------------------------------------------------------------
-            if(type == 1 ) {
-                // used to dampen if going to far
-                var dampingFactor: Float = 0.1
-                
-                if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY) {
-                    if (forceVector.x > forceVector.y) {
-                        dampingFactor = 15/forceVector.x
-                    } else {
-                        dampingFactor = 15/forceVector.y
-                    }
+            // used to dampen if going to far
+            var dampingFactor: Float = 0.1
+            
+            if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY) {
+                if (forceVector.x > forceVector.y) {
+                    dampingFactor = 15/forceVector.x
+                } else {
+                    dampingFactor = 15/forceVector.y
                 }
-                //Dampen if going to far
-                let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
+            }
+            //Dampen if going to far
+            let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
 
-    //            print("\nForce vector: \(forceVector) ")
-    //            print("\ndampened: \(dampenedForceVector) ")
-                
-                //Apply force to node, dampen if too much force is applied
+//            print("\nForce vector: \(forceVector) ")
+//            print("\ndampened: \(dampenedForceVector) ")
+            
+            //Apply force to node, dampen if too much force is applied
+            // Normal shot w/ dampening ------------------------------------------------------------
+            if(type == 1 ) {
+                explosionRadius = 10
+                damage = 10
+                print("Type 1 shot fired")
                 if(forceVector.x >= 15 || forceVector.y >= 15) {
                     projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
                 } else {
                     projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
                 }
-            } else if (type == 2) {
+            } else if (type == 2) { // laser
+                explosionRadius = 4
+                damage = 30
                 let laserForceVector = SCNVector3(forceVector.x * 10, forceVector.y * 10, forceVector.z)
                 projectile?.physicsBody?.applyForce(laserForceVector, asImpulse: true)
+            }  else if (type == 3) { // triple shot
+                explosionRadius = 10
+                damage = 7
+                print("type 3 shot fired")
+                deleteProjectiles()
+                for i in 0...2 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0 * Double(i)) {
+                        self.launchHelper(start: offsetStartingPosition, force: forceVector, dampForce: dampenedForceVector)
+                    }
+                }
+            } else if (type == 4) {
+                explosionRadius = 40
+                damage = 50
+                if(forceVector.x >= 15 || forceVector.y >= 15) {
+                    projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
+                } else {
+                    projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
+                }
             } else {
                 //just fires basic shot if no inptu for some reason
                 projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
@@ -527,6 +568,26 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             Task { try! await Task.sleep(nanoseconds:100000000)
                 projectileJustShot = false
             }
+        }
+    }
+    
+    //maybe works?
+    func launchHelper(start: SCNVector3, force: SCNVector3, dampForce: SCNVector3) {
+        var projectile: SCNNode?
+        projectile = Projectile(from: start)
+        
+        projectile?.position = start
+
+        //Use to remove later
+        projectileStore.addChildNode(projectile!)
+        
+                    print("\nForce vector: \(force) ")
+                    print("\ndampened: \(dampForce) ")
+
+        if(force.x >= 15 || force.y >= 15) {
+            projectile?.physicsBody?.applyForce(dampForce, asImpulse: true)
+        } else {
+            projectile?.physicsBody?.applyForce(force, asImpulse: true)
         }
     }
     
@@ -562,12 +623,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         ammoText.font = UIFont.systemFont(ofSize: 3)
         ammoNode = SCNNode(geometry: ammoText)
         ammoNode?.geometry?.firstMaterial?.diffuse.contents = UIColor.red
-        ammoNode!.position = SCNVector3(-45, 8, 1)
+        ammoNode!.position = SCNVector3(-40, 10, 1)
         self.rootNode.addChildNode(ammoNode!)
     }
     // sets ammo to one, can be changed later to add different ammo for different weapon types
     func giveAmmo() {
         ammunition = 1
+        print("Got ammo, Ammunition: ", ammunition)
         //update screen display
         if let textGeo = ammoNode?.geometry as? SCNText {
             textGeo.string = "shots: \(ammunition)"
@@ -576,13 +638,16 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     // sets ammo to 0, can be changed later
     func removeAmmo() {
         ammunition = 0
+        print("lost ammo, Ammunition: ", ammunition)
         // update screen display
         if let textGeo = ammoNode?.geometry as? SCNText {
             textGeo.string = "shots: \(ammunition)"
         }
     }
+
     //------------------------------------------------------------------------------------------------
     //------------------------------------------------------------------------------------------------
+
     
     func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
         
@@ -592,38 +657,49 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             //Check flag for freezing timer
             projectileIsFlying = false
             semaphore.signal()
+            //print("explosion radius: ", explosionRadius)
+            doExpLight(contact: contact)
+            levelNode.explode(pos: contact.nodeA.position, rad: explosionRadius)
+            
+            
 
-
-            levelNode.explode(pos: contact.nodeA.position)
             let dx1 = contact.contactPoint.x - player1Tank.presentation.worldPosition.x
             let dz1 = contact.contactPoint.z - player1Tank.presentation.worldPosition.z
             let dx2 = contact.contactPoint.x - player2Tank.presentation.worldPosition.x
             let dz2 = contact.contactPoint.z - player2Tank.presentation.worldPosition.z
-            if(sqrt(dx1*dx1+dz1+dz1) < 5 && contact.nodeB.parent != nil){
+            //idk
+            let halfOfExpRadius = Float(Double(explosionRadius) / 2.0)
+            if(sqrt(dx1*dx1+dz1+dz1) < halfOfExpRadius && contact.nodeB.parent != nil){
                 //NOTE distance is set to 5 to line up with explosion side of 10, since the level blocks are 0.5 scale. If we have different explosion sizes or change the scale of the cubes the distance here should be explosionSize*LevelCubeScale. Something to change later when we make different explosives with different sizes and figure out that system.
-                player1Tank.decreaseHealth(damage: 10)
+                player1Tank.decreaseHealth(damage: self.damage)
                 let forceMagnitude: Float = 60
                 player1Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
             }
-            if(sqrt(dx2*dx2+dz2+dz2) < 5 && contact.nodeB.parent != nil){
-                player2Tank.decreaseHealth(damage: 10)
+            if(sqrt(dx2*dx2+dz2+dz2) < halfOfExpRadius && contact.nodeB.parent != nil){
+                player2Tank.decreaseHealth(damage: self.damage)
                 let forceMagnitude: Float = 60
                 player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                
             }
-            contact.nodeB.removeFromParentNode()
-            
-            guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
+            if(contact.nodeB.parent != nil){
+                
+                checkDeadCondition()
+                
+                guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
                     print("Failed to load explosion.mp3")
                     return
                 }
+                
+                explodeSource.loops = false
+                explodeSource.volume = 0.3
+                explodeSource.isPositional = false
+                explodeSource.load()
+                let explodeFX = SCNAudioPlayer(source: explodeSource)
+                rootNode.addAudioPlayer(explodeFX)
+                print("ADDED EXPLOSION")
+            }
             
-            explodeSource.loops = false
-            explodeSource.volume = 0.3
-            explodeSource.isPositional = false
-            explodeSource.load()
-            let explodeFX = SCNAudioPlayer(source: explodeSource)
-            rootNode.addAudioPlayer(explodeFX)
-            print("ADDED EXPLOSION")
+            contact.nodeB.removeFromParentNode()
             
         }else if contactMask == (PhysicsCategory.tank | PhysicsCategory.projectile){
             //Tank specific collision if we do that
@@ -676,7 +752,48 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 print("ADDED EXPLOSION")
             }
         }
+        
 
+    }
+    
+    func doExpLight(contact: SCNPhysicsContact) {
+        let expLightNode = SCNNode()
+        expLightNode.position = SCNVector3(x: contact.contactPoint.x, y: contact.contactPoint.y + 0.1, z: contact.contactPoint.z + 2)
+        expLightNode.light = SCNLight()
+        expLightNode.light?.type = SCNLight.LightType.omni
+        expLightNode.light?.intensity = 0
+        expLightNode.light?.attenuationStartDistance = 5
+        expLightNode.light?.attenuationFalloffExponent = 3
+        expLightNode.light?.attenuationEndDistance = 15
+        expLightNode.light?.color = UIColor(red: 0.96, green: 0.61, blue: 0.98, alpha: 1)
+        rootNode.addChildNode(expLightNode)
+        
+        let anim = CABasicAnimation(keyPath: "intensity")
+        anim.fromValue = 300000
+        anim.toValue = 0
+        anim.duration = 0.3
+        anim.repeatCount = 0
+        anim.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+        
+        let expFlatNode = SCNNode()
+        expFlatNode.geometry = SCNCylinder(radius: 5.5, height: 1)
+        expFlatNode.rotation = SCNVector4(1, 0, 0, Float.pi/2)
+        expFlatNode.position = SCNVector3(contact.contactPoint.x, contact.contactPoint.y, contact.contactPoint.z)
+        expFlatNode.geometry?.firstMaterial?.diffuse.contents = UIColor.white
+        expFlatNode.geometry?.firstMaterial?.transparency = 0.0
+        rootNode.addChildNode(expFlatNode)
+        
+        let anim2 = CABasicAnimation(keyPath: "transparency")
+        anim2.fromValue = 1.0
+        anim2.toValue = 0.0
+        anim2.duration = 0.2
+        anim2.repeatCount = 0
+        anim2.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeIn)
+        
+        expLightNode.light?.addAnimation(anim, forKey: "dim")
+        expFlatNode.geometry?.firstMaterial?.addAnimation(anim2, forKey: "fade")
+        expLightNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.5), SCNAction.removeFromParentNode()]))
+        expFlatNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.3), SCNAction.removeFromParentNode()]))
     }
     
     func getTankPosition() -> SCNVector3? {
@@ -687,12 +804,35 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
         return nil
     }
-
-    func turnEndedPressed() {
-        turnEnded = true
+    
+    // Menu button pressed
+    func pauseTriggered() {
+        pauseOn = true
+        // set this back on later
+        canMove = false
+        print("Paused")
     }
+    // Returns from pause menu
+    func returnFromMenu() {
+        pauseOn = false
+        canMove = true
+        pauseSem.signal()
+        print("Unpaused")
+    }
+    
+    // Used as a trigger within turn timer async to break out of the function entirely
+    func turnEndedPressed() {
+        // if paused, can't end turn
+        if(pauseOn) {
+            return
+        }
+        turnEnded = true
+        print("Turn End pressed")
+    }
+    
     var count = 0
     func toggleTurns() {
+        print("toggleTurns called")
         let player: Int
         if (activePlayer == 1){
             player = 1
@@ -704,9 +844,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         let textMaterial = SCNMaterial()
         textMaterial.diffuse.contents = UIColor.blue
         
-        //Stuf that happens
-        //deleteProjectiles()
-        
 
         // Declare countdownNode and winNode outside the closure
         var countdownNode: SCNNode?
@@ -716,22 +853,36 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         // Countdown
         DispatchQueue.global().async {
             for i in (1...self.turnTime).reversed() {
+                // Check if game is paused, need to return this later
+                while (self.pauseOn)  {
+                    if (self.pauseSem.wait(timeout: .now() + 0.1) == .timedOut) {
+                        // Continue to check if pauseOn is set to true
+                        print("\n Paused")
+                    } else {
+                        // Nothing
+                        break
+                    }
+
+                }
+                
                 if (self.turnEnded == true) {
                     break
                 }
                 DispatchQueue.main.async {
                     let countdownText = SCNText(string: "\(i)", extrusionDepth: 0.0)
+                    countdownText.font = UIFont.systemFont(ofSize: 5)
                     countdownText.firstMaterial = textMaterial
                     countdownNode = SCNNode(geometry: countdownText)
-                    countdownNode!.position = SCNVector3(-35, -10, 1)
+                    countdownNode!.position = SCNVector3(36, 10, 1)
                     self.rootNode.addChildNode(countdownNode!)
                     //print("Countdown: \(i)")
                     //player stuff to determine who's turn it is
                     let winText = SCNText(string: "Player \(player) turn", extrusionDepth: 0.0)
+                    winText.firstMaterial?.diffuse.contents = UIColor.black
                     winText.font = UIFont.systemFont(ofSize: 5)
                     winNode = SCNNode(geometry: winText)
                     self.rootNode.addChildNode(winNode!)
-                    winNode!.position = SCNVector3(-35, 1, 1)
+                    winNode!.position = SCNVector3(-14, 7, 1)
                     //print("Player \(player) turn")
                 }
                 // Wait for projectile
@@ -740,16 +891,22 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     if (self.semaphore.wait(timeout: .now() + 0.1) == .timedOut) {
                         //Keep checking if projectile is still flying (go down to physics body for contact)
                         // checks if projectile completely whiffed and is fyling through the air
-                        self.count+=1
-                        if (self.count == 20){
+                        
+                        if (self.pauseOn == false) {
+                            self.count+=1
+                        }
+                        // Count 1 if projectile is in the air (flying state0
+                        print("count1: ",self.count)
+                        if (self.count > 50){
                             self.shotWhiff = 1
                         }
-                        
+
                         if (self.shotWhiff == 1) {
                             print("\n shot whiffed")
                             self.shotWhiff = 0
                             self.count = 0
                             self.projectileIsFlying = false
+                            self.deleteProjectiles()
                             self.semaphore.signal()
                             break
                         }
@@ -757,6 +914,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                         print("\n waiting \(self.count)")
                     } else {
                         self.count = 0
+
                         break
                     }
                 }
@@ -804,7 +962,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             
             // Add buffer of time before passing control to avoid troll situations
-            for i in (1...3).reversed() {
+            for i in (1...2).reversed() {
                 
                 DispatchQueue.main.async {
                     //store whether player is allowed to move or not
@@ -813,6 +971,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     self.canMove = false
                     
                     let swapText = SCNText(string: "Passing Control to Player \(self.activePlayer) in \(i)", extrusionDepth: 0.0)
+                    swapText.firstMaterial?.diffuse.contents = UIColor.black
                     swapText.font = UIFont.systemFont(ofSize: 5)
                     swapNode = SCNNode(geometry: swapText)
                     self.rootNode.addChildNode(swapNode!)

@@ -25,6 +25,8 @@ struct SceneKitView: UIViewControllerRepresentable {
             context.coordinator.setupFireButton(on: vc.view as! SCNView)
             context.coordinator.setupGestureRecognizers(on: vc.view as! SCNView)
             context.coordinator.setupPicker(on: vc.view as! SCNView)
+            context.coordinator.setupPause(on: vc.view as! SCNView)
+            context.coordinator.createPause(on: vc.view as! SCNView)
         }
         return vc
 
@@ -71,6 +73,14 @@ struct SceneKitView: UIViewControllerRepresentable {
         var mainScene: MainScene
         // button var for changing its properties
         var toggleButton: UIButton?
+        // picker view
+        var weapons: UIPickerView?
+        // button to return to main
+        var returnButton: UIButton?
+        // button to close menu
+        var closeButton: UIButton?
+        // button to induce pause
+        var pauseButton: UIButton?
         //toggle boolean for fire mode on/off
         var fireModeOn = false;
         // used for self reference to figure out who's turn it is
@@ -78,13 +88,11 @@ struct SceneKitView: UIViewControllerRepresentable {
         // shot type used to alter launch projectile
         var shotType = 1
         // array with shot types
-        let shotTypes = ["Lob","Laser", "Orignator"]
+        let shotTypes = ["Lob","Laser", "Triple", "Царь-бомба"]
         
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
             self.mainScene = mainScene
-            //Put this bad boy here to trigger as soon as MainScene is rendered, kind of bandaid fix honestly
-            mainScene.toggleTurns()
         }
         
         //sets up gesture
@@ -116,11 +124,12 @@ struct SceneKitView: UIViewControllerRepresentable {
         }
         
         func setupPicker(on view: SCNView) {
-            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 100, width: 100, height: 100))
+            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 70, width: 100, height: 60))
             pickerView.delegate = self
             pickerView.dataSource = self
             pickerView.backgroundColor = .green
             view.addSubview(pickerView)
+            weapons = pickerView
             
         }
         
@@ -129,7 +138,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         }
         
         func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-            return 3
+            return 4
         }
         
         func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
@@ -141,11 +150,19 @@ struct SceneKitView: UIViewControllerRepresentable {
             print("shot type: ", shotType)
         }
         
-
+        func setupPause(on view: SCNView) {
+            let button = UIButton(frame: CGRect(x: 205, y: 20, width: 100, height: 50))
+            //button color, tittle, action
+            button.backgroundColor = .blue
+            button.setTitle("Pause", for: .normal)
+            button.addTarget(self, action: #selector(pauseGame), for:.touchUpInside)
+            view.addSubview(button)
+            pauseButton = button
+        }
         
         // Creates fire button on screen view, so it remains on screen when panning
         func setupFireButton(on view: SCNView) {
-            let button = UIButton(frame: CGRect(x: 20, y: 50, width: 100, height: 50))
+            let button = UIButton(frame: CGRect(x: 20, y: 20, width: 100, height: 50))
             //button color, tittle, action
             button.backgroundColor = .blue
             button.setTitle("Move Mode", for: .normal)
@@ -153,6 +170,7 @@ struct SceneKitView: UIViewControllerRepresentable {
             view.addSubview(button)
             self.toggleButton = button
         }
+        
         //swap text of UIButton,
         func fireModeText() {
             if let button = toggleButton {
@@ -173,6 +191,44 @@ struct SceneKitView: UIViewControllerRepresentable {
                 }
             }
         }
+        // called when pause is pressed
+        @objc func pauseGame() {
+            print("Pause woohooo")
+            mainScene.pauseTriggered()
+            disableButtons()
+            returnButton?.isHidden = false
+            closeButton?.isHidden = false
+            mainScene.isPaused = true
+        }
+        // buttons for pause menu
+        @objc func createPause(on view: SCNView) {
+            // Return to main
+            let button1 = UIButton(frame: CGRect(x: 350, y: 100, width: 150, height: 50))
+            //button color, tittle, action
+            button1.backgroundColor = .red
+            button1.setTitle("Return to Main", for: .normal)
+            button1.addTarget(self, action: #selector(returnToMain), for:.touchUpInside)
+            view.addSubview(button1)
+            returnButton = button1
+            returnButton?.isHidden = true
+            // Exit
+            let button2 = UIButton(frame: CGRect(x: 350, y: 150, width: 150, height: 50))
+            //button color, tittle, action
+            button2.backgroundColor = .blue
+            button2.setTitle("Close Menu", for: .normal)
+            button2.addTarget(self, action: #selector(unPause), for:.touchUpInside)
+            view.addSubview(button2)
+            closeButton = button2
+            closeButton?.isHidden = true
+        }
+        
+        @objc func unPause() {
+            returnButton?.isHidden = true
+            closeButton?.isHidden = true
+            enableButtons()
+            mainScene.returnFromMenu()
+            mainScene.isPaused = false
+        }
         
         //Grabs function from main scene
         @objc func toggleFire() {
@@ -181,8 +237,21 @@ struct SceneKitView: UIViewControllerRepresentable {
             mainScene.toggleFire(isFireMode: fireModeOn)
         }
         // doesn't need to be used
-        @objc func disableFireButton() {
+        @objc func disableButtons() {
             toggleButton?.isEnabled = false
+            weapons?.isUserInteractionEnabled = false
+            pauseButton?.isEnabled = false
+        }
+        
+        @objc func enableButtons() {
+            toggleButton?.isEnabled = true
+            weapons?.isUserInteractionEnabled = true
+            pauseButton?.isEnabled = true
+        }
+        
+        @objc func returnToMain() {
+            unPause()
+            mainScene.resetToStartScreen()
         }
     }
     

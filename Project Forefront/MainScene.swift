@@ -52,6 +52,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var canMove: Bool = true
     // used for freezing movement during turn transition
     var moveFlag: Bool = true
+    // Pause pressed
+    var pauseOn: Bool = false
+    // pause semaphore
+    let pauseSem = DispatchSemaphore(value: 0)
     // used to check if turnEnd button is clicked
     var turnEnded: Bool = false
     // turn time
@@ -746,10 +750,32 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
         return nil
     }
-
-    func turnEndedPressed() {
-        turnEnded = true
+    
+    // Menu button pressed
+    func pauseTriggered() {
+        pauseOn = true
+        // set this back on later
+        canMove = false
+        print("Paused")
     }
+    // Returns from pause menu
+    func returnFromMenu() {
+        pauseOn = false
+        canMove = true
+        pauseSem.signal()
+        print("Unpaused")
+    }
+    
+    // Used as a trigger within turn timer async to break out of the function entirely
+    func turnEndedPressed() {
+        // if paused, can't end turn
+        if(pauseOn) {
+            return
+        }
+        turnEnded = true
+        print("Turn End pressed")
+    }
+    
     var count = 0
     func toggleTurns() {
         print("toggleTurns called")
@@ -764,9 +790,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         let textMaterial = SCNMaterial()
         textMaterial.diffuse.contents = UIColor.blue
         
-        //Stuf that happens
-        //deleteProjectiles()
-        
 
         // Declare countdownNode and winNode outside the closure
         var countdownNode: SCNNode?
@@ -776,6 +799,18 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         // Countdown
         DispatchQueue.global().async {
             for i in (1...self.turnTime).reversed() {
+                // Check if game is paused, need to return this later
+                while (self.pauseOn)  {
+                    if (self.pauseSem.wait(timeout: .now() + 0.1) == .timedOut) {
+                        // Continue to check if pauseOn is set to true
+                        print("\n Paused")
+                    } else {
+                        // Nothing
+                        break
+                    }
+
+                }
+                
                 if (self.turnEnded == true) {
                     break
                 }
@@ -802,11 +837,16 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     if (self.semaphore.wait(timeout: .now() + 0.1) == .timedOut) {
                         //Keep checking if projectile is still flying (go down to physics body for contact)
                         // checks if projectile completely whiffed and is fyling through the air
-                        self.count+=1
-                        if (self.count == 50){
+                        
+                        if (self.pauseOn == false) {
+                            self.count+=1
+                        }
+                        // Count 1 if projectile is in the air (flying state0
+                        print("count1: ",self.count)
+                        if (self.count > 50){
                             self.shotWhiff = 1
                         }
-                        
+
                         if (self.shotWhiff == 1) {
                             print("\n shot whiffed")
                             self.shotWhiff = 0
@@ -820,6 +860,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                         print("\n waiting \(self.count)")
                     } else {
                         self.count = 0
+
                         break
                     }
                 }

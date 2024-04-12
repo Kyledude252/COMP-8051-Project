@@ -133,6 +133,8 @@ struct ContentView: View {
                         }
                     }
                 }
+ 
+                
                 Spacer(minLength: 200)
                 VStack(spacing: 2) {
                     ForEach((0..<totalBoosts).reversed(), id: \.self) { index in

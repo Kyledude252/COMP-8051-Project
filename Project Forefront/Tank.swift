@@ -144,7 +144,6 @@ class Tank: SCNNode {
         tankPhysicsBody?.categoryBitMask = PhysicsCategory.tank
         tankPhysicsBody?.contactTestBitMask = PhysicsCategory.levelSquare
         tankPhysicsBody?.contactTestBitMask = PhysicsCategory.projectile
-        tankPhysicsBody?.collisionBitMask = PhysicsCategory.levelSquare
 
 
 

@@ -35,7 +35,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     var projectileJustShot = false
     
-    var damageMultipled = false
+    var tank1Position = SCNVector3(0,0,0)
+    
+    var tank2Position = SCNVector3(0,0,0)
     
     //grab view
     weak var scnView: SCNView?
@@ -702,18 +704,73 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             }
             
             contact.nodeB.removeFromParentNode()
-            damageMultipled = false
             
         }else if contactMask == (PhysicsCategory.tank | PhysicsCategory.projectile){
             //Tank specific collision if we do that
             
-            if (!projectileJustShot && !damageMultipled) {
-                damage = damage * 2
-                damageMultipled = true
+            if (!projectileJustShot) {
+                //Check flag for freezing timer
+                projectileIsFlying = false
+                semaphore.signal()
+                //print("explosion radius: ", explosionRadius)
+                doExpLight(contact: contact)
+
+                let dx1 = contact.contactPoint.x - player1Tank.presentation.worldPosition.x
+                let dz1 = contact.contactPoint.z - player1Tank.presentation.worldPosition.z
+                let dx2 = contact.contactPoint.x - player2Tank.presentation.worldPosition.x
+                let dz2 = contact.contactPoint.z - player2Tank.presentation.worldPosition.z
+                //idk
+                let halfOfExpRadius = Float(Double(explosionRadius) / 2.0)
+                if(contact.nodeA.name == "Tank1" && contact.nodeB.parent != nil){
+                    //NOTE distance is set to 5 to line up with explosion side of 10, since the level blocks are 0.5 scale. If we have different explosion sizes or change the scale of the cubes the distance here should be explosionSize*LevelCubeScale. Something to change later when we make different explosives with different sizes and figure out that system.
+                    levelNode.explode(pos: tank1Position, rad: explosionRadius)
+                    player1Tank.decreaseHealth(damage: self.damage * 2)
+                    let forceMagnitude: Float = 60
+                    player1Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                    if (sqrt(dx2*dx2+dz2+dz2) < halfOfExpRadius) {
+                        player2Tank.decreaseHealth(damage: self.damage)
+                        let forceMagnitude: Float = 60
+                        player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                    }
+                }
+                if(contact.nodeA.name == "Tank2" && contact.nodeB.parent != nil){
+                    levelNode.explode(pos: tank2Position, rad: explosionRadius)
+                    player2Tank.decreaseHealth(damage: self.damage * 2)
+                    let forceMagnitude: Float = 60
+                    player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                    if (sqrt(dx1*dx1+dz1+dz1) < halfOfExpRadius) {
+                        player1Tank.decreaseHealth(damage: self.damage)
+                        let forceMagnitude: Float = 60
+                        player1Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                    }
+                }
+                if(contact.nodeB.parent != nil){
+                    
+                    checkDeadCondition()
+                    
+                    guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
+                        print("Failed to load explosion.mp3")
+                        return
+                    }
+                    
+                    explodeSource.loops = false
+                    explodeSource.volume = 0.3
+                    explodeSource.isPositional = false
+                    explodeSource.load()
+                    let explodeFX = SCNAudioPlayer(source: explodeSource)
+                    rootNode.addAudioPlayer(explodeFX)
+                    print("ADDED EXPLOSION")
+                }
+                
+                contact.nodeB.removeFromParentNode()
+            }
+        }  else if contactMask == (PhysicsCategory.levelSquare | PhysicsCategory.tank) {
+            if (contact.nodeB.name == "Tank1") {
+                tank1Position = contact.nodeA.position
+            } else if (contact.nodeB.name == "Tank2") {
+                tank2Position = contact.nodeA.position
             }
         }
-        
-
     }
     
     func doExpLight(contact: SCNPhysicsContact) {

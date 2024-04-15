@@ -21,11 +21,12 @@ class Tank: SCNNode {
     private var tankPhysicsBody: SCNPhysicsBody?
     
     
-    init(position: SCNVector3, color: UIColor) {
+    init(position: SCNVector3, color: UIColor, name: String) {
         super.init()
         
         let tankGeometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 0)
         tankGeometry.firstMaterial?.diffuse.contents = color
+        self.name = name
         self.geometry = tankGeometry
         self.position = position
         

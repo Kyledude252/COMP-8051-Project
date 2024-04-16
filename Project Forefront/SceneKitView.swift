@@ -104,18 +104,18 @@ struct SceneKitView: UIViewControllerRepresentable {
         @objc func handlePan(gesture: UIPanGestureRecognizer) {
             //set scene from MainScene
             //Does not allow gesture to handle if fire mode is not toggled
-            if let scnView = gesture.view as? SCNView, let scene = scnView.scene as? MainScene, fireModeOn {
+            if let scnView = gesture.view as? SCNView, let scene = scnView.scene as? MainScene/*, fireModeOn*/ {
                 let location = gesture.location(in: scnView)
                 // Convert the 2D touch point to a 3D point in the scene
                 // The z value of this point and other points MUST match the same z plane as the tank otherwise
                 // later on detetion will not trigger
                 let projectedOrigin = scnView.projectPoint(SCNVector3(0, 0, 0))
                 let touchPoint = scnView.unprojectPoint(SCNVector3(Float(location.x), Float(location.y), projectedOrigin.z))
-                if gesture.state == .changed && fireModeOn {
+                if gesture.state == .changed /*&& fireModeOn*/ {
                     // calling from MainScene
                     scene.createTrajectoryLine(from: scene.getTankPosition()!, to: touchPoint)
                     
-                } else if gesture.state == .ended && fireModeOn {
+                } else if gesture.state == .ended /*&& fireModeOn*/ {
                     // Carry on variable here
                     scene.launchProjectile(from: scene.getTankPosition()!, to: touchPoint, type: shotType)
 

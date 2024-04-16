@@ -153,7 +153,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         }
         
         func setupPause(on view: SCNView) {
-            let button = UIButton(frame: CGRect(x: 205, y: 20, width: 100, height: 50))
+            let button = UIButton(frame: CGRect(x: 125, y: 20, width: 100, height: 50))
             //button color, tittle, action
             button.backgroundColor = UIColor(red: 0.25, green: 0.25, blue: 0.45, alpha: 1.0)
             button.layer.cornerRadius = 10

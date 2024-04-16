@@ -612,6 +612,11 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     ///------------------------------------------------
     // used to set-up text for ammunition
     func setUpAmmo() {
+        let ammoBkg = SCNPlane(width: 12.8, height: 4)
+        ammoBkg.cornerRadius = 1.5
+        let bkgNode = SCNNode(geometry: ammoBkg)
+        bkgNode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.25, green: 0.25, blue: 0.45, alpha: 1.0)
+        
         let ammoCircle = SCNPlane(width: 2, height: 2)
         ammoCircle.cornerRadius = ammoCircle.width/2
         let circleNode = SCNNode(geometry: ammoCircle)
@@ -620,10 +625,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         let ammoText = SCNText(string: "Shots:", extrusionDepth: 0.0)
         ammoText.font = UIFont.systemFont(ofSize: 3)
         ammoNode = SCNNode(geometry: ammoText)
-        ammoNode?.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+        ammoNode?.geometry?.firstMaterial?.diffuse.contents = UIColor.white
         ammoNode!.position = SCNVector3(-52, -5, 1)
         circleNode.position = SCNVector3(10.5, 1.85, 0)
+        bkgNode.position = SCNVector3(6, 2, -0.01)
         ammoNode?.addChildNode(circleNode)
+        ammoNode?.addChildNode(bkgNode)
         self.rootNode.addChildNode(ammoNode!)
     }
     // sets ammo to one, can be changed later to add different ammo for different weapon types

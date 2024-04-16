@@ -357,23 +357,25 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 //        }
 //    }
     
-    func checkForReset() -> Bool {
-        if (player1Tank.getHealth() <= 0 || player2Tank.getHealth() <= 0) {
-            return true
-        } else {
-            return false
-        }
-    }
+//    func checkForReset() -> Bool {
+//        if (player1Tank.getHealth() <= 0 || player2Tank.getHealth() <= 0) {
+//            return true
+//        } else {
+//            return false
+//        }
+//    }
     
     func checkDeadCondition () {
         // a little duplicacated but fine for now
         
         let textMaterial = SCNMaterial()
         textMaterial.diffuse.contents = UIColor.green
-
+        
+        // Check if a tank is dead
         if (player1Tank.getHealth() <= 0) {
             let winNode = SCNNode()
             var winText = SCNText()
+            // Update stats screen
             var player2Wins = UserDefaults.standard.integer(forKey: "Player2Wins")
             player2Wins += 1
             UserDefaults.standard.set(player2Wins, forKey: "Player2Wins")
@@ -385,6 +387,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             winNode.geometry = winText
             rootNode.addChildNode(winNode)
             winNode.position = SCNVector3(-35, -6, 1)
+            // After 5 seconds, return to start screen
             Task { try! await Task.sleep(nanoseconds: 5000000000)
                 await winNode.removeFromParentNode()
                 resetToStartScreen()
@@ -599,6 +602,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             projectileJustShot = true
             playerBoostCount=10
             
+            // Wait 0.2 seconds before projectile can collide with tanks
             Task { try! await Task.sleep(nanoseconds:20000000)
                 projectileJustShot = false
             }
@@ -767,6 +771,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 let dz2 = contact.contactPoint.z - player2Tank.presentation.worldPosition.z
                 //idk
                 let halfOfExpRadius = Float(Double(explosionRadius) / 2.0)
+                // Check which tank the projectile has collided with
                 if(contact.nodeA.name == "Tank1" && contact.nodeB.parent != nil){
                     //NOTE distance is set to 5 to line up with explosion side of 10, since the level blocks are 0.5 scale. If we have different explosion sizes or change the scale of the cubes the distance here should be explosionSize*LevelCubeScale. Something to change later when we make different explosives with different sizes and figure out that system.
                     levelNode.explode(pos: tank1Position, rad: explosionRadius)
@@ -812,6 +817,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 contact.nodeB.removeFromParentNode()
             }
         }  else if contactMask == (PhysicsCategory.levelSquare | PhysicsCategory.tank) {
+            // Update position of tanks relative to level square
             if (contact.nodeB.name == "Tank1") {
                 tank1Position = contact.nodeA.position
             } else if (contact.nodeB.name == "Tank2") {
@@ -1103,27 +1109,27 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
 
 
-    // PHYSICS // /////////////
-    
-    func handleTankLevelSquareCollision(tank: Tank, levelSquare: LevelSquare) {
-        // Enum to represent collision sides
-       
-    }
-
-
-    func handleTankProjectileCollision(tank: Tank, projectile: Projectile) {
-        print("Tank collided with projectile")
-        // Implement collision handling logic here
-        tank.decreaseHealth(damage: 20);
-        checkDeadCondition()
-    }
-
-    func handleLevelSquareProjectileCollision(levelSquare: LevelSquare, projectile: Projectile) {
-        print("Level square collided with projectile")
-        // Implement collision handling logic here
-       
-    }
-    
+//    // PHYSICS // /////////////
+//    
+//    func handleTankLevelSquareCollision(tank: Tank, levelSquare: LevelSquare) {
+//        // Enum to represent collision sides
+//       
+//    }
+//
+//
+//    func handleTankProjectileCollision(tank: Tank, projectile: Projectile) {
+//        print("Tank collided with projectile")
+//        // Implement collision handling logic here
+//        tank.decreaseHealth(damage: 20);
+//        checkDeadCondition()
+//    }
+//
+//    func handleLevelSquareProjectileCollision(levelSquare: LevelSquare, projectile: Projectile) {
+//        print("Level square collided with projectile")
+//        // Implement collision handling logic here
+//       
+//    }
+//    
 
 }
 

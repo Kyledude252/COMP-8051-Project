@@ -532,13 +532,14 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             // used to dampen if going to far
             var dampingFactor: Float = 0.1
             
-            if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY) {
-                if (forceVector.x > forceVector.y) {
-                    dampingFactor = 15/forceVector.x
+            if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY || forceVector.x <= -maxProjectileX || forceVector.y <= -maxProjectileY) {
+                if (abs(forceVector.x) > abs(forceVector.y)) {
+                    dampingFactor = 15 / abs(forceVector.x)
                 } else {
-                    dampingFactor = 15/forceVector.y
+                    dampingFactor = 15 / abs(forceVector.y)
                 }
             }
+            
             //Dampen if going to far
             let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
 

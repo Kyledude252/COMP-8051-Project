@@ -8,6 +8,7 @@
 import Foundation
 import SceneKit
 
+
 class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
@@ -500,7 +501,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             // need offset to avoid physics
             // might need to edit this value later to change interactions
-            let offsetFactor: Float = 0.06
+            let offsetFactor: Float = 0.8
             let offsetStartingPosition = SCNVector3(startPoint.x + (direction.x * offsetFactor), startPoint.y + (direction.y * offsetFactor), startPoint.z + direction.z * offsetFactor)
             
             let lightOffsetFactor: Float = 0.01
@@ -523,6 +524,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
             //Use to remove later
             projectileStore.addChildNode(projectile!)
+            
             
             //Add scalar, edit as needed, maybe add to paramter later for different shots
             let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
@@ -583,7 +585,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             }
             
             playShootSound()
-
+            // shot shake (smaller)
+            cameraShake(duration: 0.50, intensity: 0.2)
             
             // For freezing turn
             projectileIsFlying = true
@@ -691,7 +694,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             //print("explosion radius: ", explosionRadius)
             doExpLight(contact: contact)
             levelNode.explode(pos: contact.nodeA.position, rad: explosionRadius)
-            
+            cameraShake(duration: 2.0, intensity: 0.50)
             
 
             let dx1 = contact.contactPoint.x - player1Tank.presentation.worldPosition.x
@@ -787,6 +790,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     let explodeFX = SCNAudioPlayer(source: explodeSource)
                     rootNode.addAudioPlayer(explodeFX)
                     print("ADDED EXPLOSION")
+                    cameraShake(duration: 2.0, intensity: 0.50)
                 }
                 
                 contact.nodeB.removeFromParentNode()
@@ -1043,6 +1047,44 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
         }
     }
+    
+    func cameraShake (duration: TimeInterval, intensity: Float){
+        let originalPosition = cameraNode.position
+        
+        let numShakeActions = Int(duration / 0.2)
+        
+        var shakeActions: [SCNAction] = []
+        
+        
+        let intensityDecayRate = intensity / Float(numShakeActions)
+        var currentIntensity = intensity
+        
+        for _ in 0..<numShakeActions {
+                // Generate random offsets
+                let offsetX = Float.random(in: -currentIntensity...currentIntensity)
+                let offsetY = Float.random(in: -currentIntensity/2...currentIntensity/2)
+                let offsetZ = Float.random(in: -currentIntensity/2...currentIntensity/2)
+                
+            let shakeAction1 = SCNAction.move(by: SCNVector3(offsetX, offsetY, offsetZ), duration: 0.1)
+            let shakeAction2 = SCNAction.move(by: SCNVector3(-offsetX * 2, -offsetY * 2, -offsetZ * 2), duration: 0.1)
+                
+                shakeActions.append(shakeAction1)
+                shakeActions.append(shakeAction2)
+            
+            currentIntensity -= intensityDecayRate
+
+            }
+        
+        // ease back after
+        let easeBackAction = SCNAction.move(to: originalPosition, duration: 0.5)
+        shakeActions.append(easeBackAction)
+        
+        let shakeSequence = SCNAction.sequence(shakeActions)
+            
+            cameraNode.runAction(shakeSequence) {
+                self.cameraNode.position = originalPosition
+            }
+    }
 
 
     // PHYSICS // /////////////
@@ -1065,6 +1107,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         // Implement collision handling logic here
        
     }
+    
+
 }
 
 

@@ -88,7 +88,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         // shot type used to alter launch projectile
         var shotType = 1
         // array with shot types
-        let shotTypes = ["Lob","Laser", "Triple", "Царь-бомба"]
+        let shotTypes = ["Lob","Laser", "Triple"]
         
         init(_ parent: SceneKitView, mainScene: MainScene) {
             self.parent = parent
@@ -140,7 +140,7 @@ struct SceneKitView: UIViewControllerRepresentable {
         }
         
         func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-            return 4
+            return 3
         }
         
         func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {

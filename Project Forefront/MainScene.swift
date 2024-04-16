@@ -501,7 +501,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             // need offset to avoid physics
             // might need to edit this value later to change interactions
-            let offsetFactor: Float = 0.8
+            let offsetFactor: Float = 0.05
             let offsetStartingPosition = SCNVector3(startPoint.x + (direction.x * offsetFactor), startPoint.y + (direction.y * offsetFactor), startPoint.z + direction.z * offsetFactor)
             
             let lightOffsetFactor: Float = 0.01
@@ -599,7 +599,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             projectileJustShot = true
             playerBoostCount=10
             
-            Task { try! await Task.sleep(nanoseconds:20000000)
+            Task { try! await Task.sleep(nanoseconds:50000000)
                 projectileJustShot = false
             }
         }

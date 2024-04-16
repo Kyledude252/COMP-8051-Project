@@ -40,6 +40,6 @@ class LevelSquare: SCNNode {
 
         self.physicsBody = physicsBody
         physicsBody.mass = 0
-        physicsBody.friction = 10
+        physicsBody.friction = 15
     }
 }

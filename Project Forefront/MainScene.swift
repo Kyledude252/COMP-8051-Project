@@ -357,13 +357,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 //        }
 //    }
     
-    func checkForReset() -> Bool {
-        if (player1Tank.getHealth() <= 0 || player2Tank.getHealth() <= 0) {
-            return true
-        } else {
-            return false
-        }
-    }
+//    func checkForReset() -> Bool {
+//        if (player1Tank.getHealth() <= 0 || player2Tank.getHealth() <= 0) {
+//            return true
+//        } else {
+//            return false
+//        }
+//    }
     
     func checkDeadCondition () {
         // a little duplicacated but fine for now
@@ -1093,27 +1093,27 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
 
 
-    // PHYSICS // /////////////
-    
-    func handleTankLevelSquareCollision(tank: Tank, levelSquare: LevelSquare) {
-        // Enum to represent collision sides
-       
-    }
-
-
-    func handleTankProjectileCollision(tank: Tank, projectile: Projectile) {
-        print("Tank collided with projectile")
-        // Implement collision handling logic here
-        tank.decreaseHealth(damage: 20);
-        checkDeadCondition()
-    }
-
-    func handleLevelSquareProjectileCollision(levelSquare: LevelSquare, projectile: Projectile) {
-        print("Level square collided with projectile")
-        // Implement collision handling logic here
-       
-    }
-    
+//    // PHYSICS // /////////////
+//    
+//    func handleTankLevelSquareCollision(tank: Tank, levelSquare: LevelSquare) {
+//        // Enum to represent collision sides
+//       
+//    }
+//
+//
+//    func handleTankProjectileCollision(tank: Tank, projectile: Projectile) {
+//        print("Tank collided with projectile")
+//        // Implement collision handling logic here
+//        tank.decreaseHealth(damage: 20);
+//        checkDeadCondition()
+//    }
+//
+//    func handleLevelSquareProjectileCollision(levelSquare: LevelSquare, projectile: Projectile) {
+//        print("Level square collided with projectile")
+//        // Implement collision handling logic here
+//       
+//    }
+//    
 
 }
 

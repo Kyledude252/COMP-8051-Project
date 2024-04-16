@@ -454,6 +454,33 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         // Set the new line node
         self.lineNode = lineNode
         self.rootNode.addChildNode(lineNode)
+        
+        //Angle the tank turret
+        
+        let dx = endPoint.x - startPoint.x
+        let dy = endPoint.y - startPoint.y
+        var angle = atan2(dy, dx)
+        var playerTank = activePlayer == 1 ? player1Tank : player2Tank
+        
+        if(abs(angle) > Float.pi/2){
+            playerTank?.tankModel.eulerAngles = SCNVector3(0,Double.pi,0)
+            playerTank?.facingRight = false
+        }else{
+            playerTank?.tankModel.eulerAngles = SCNVector3(0,0,0)
+            playerTank?.facingRight = true
+        }
+        
+        if(!playerTank!.facingRight){
+            angle = atan2(dy, startPoint.x - endPoint.x)
+        }
+        
+        let turretNode = playerTank?.tankModel.childNode(withName: "Gun", recursively: true)
+        turretNode?.eulerAngles = SCNVector3(-angle,.pi/2,0)
+        
+
+        
+        
+        
     }
 
     // type:

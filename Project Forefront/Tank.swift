@@ -16,7 +16,9 @@ class Tank: SCNNode {
     let healthBar = SCNNode()
     var size: Int = 1
     var currentSoundPlayer: SCNAudioPlayer?
-   
+    var tankMaterial = SCNMaterial()
+    var tankModel = SCNNode()
+    var facingRight = true
     
     private var tankPhysicsBody: SCNPhysicsBody?
     
@@ -25,7 +27,17 @@ class Tank: SCNNode {
         super.init()
         
         let tankGeometry = SCNBox(width: 1, height: 1, length: 1, chamferRadius: 0)
-        tankGeometry.firstMaterial?.diffuse.contents = color
+        tankModel = loadModelFromFile(modelName: "Tank", fileExtension: "dae")
+        tankModel.position = SCNVector3(0, -0.5, 0)
+        tankModel.scale = SCNVector3(0.13, 0.13, 0.13)
+        
+        tankMaterial.diffuse.contents = color
+        applyMaterialToAllNodes(node: tankModel)
+        tankModel.geometry?.materials = [tankMaterial]
+        
+        addChildNode(tankModel)
+        tankGeometry.firstMaterial?.transparency = 0
+        //tankGeometry.firstMaterial?.diffuse.contents = color
         self.name = name
         self.geometry = tankGeometry
         self.position = position
@@ -45,6 +57,15 @@ class Tank: SCNNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func applyMaterialToAllNodes(node: SCNNode) {
+        if let geometry = node.geometry {
+            geometry.materials = [tankMaterial]
+        }
+        for childNode in node.childNodes {
+            applyMaterialToAllNodes(node: childNode)
+        }
+    }
+    
     func printNodeHierarchy(_ node: SCNNode, level: Int = 0) {
         let indent = String(repeating: "  ", count: level)
         print("\(indent)\(node.name ?? "Unnamed Node")")
@@ -57,12 +78,16 @@ class Tank: SCNNode {
         let forceMagnitude: Float = 60
         tankPhysicsBody?.applyForce(SCNVector3(-forceMagnitude, 0, 0), asImpulse: false)
         playMoveSound()
+        tankModel.eulerAngles = SCNVector3(0,Double.pi,0)
+        facingRight = false
     }
     
     func moveRight() {
         let forceMagnitude: Float = 60
         tankPhysicsBody?.applyForce(SCNVector3(forceMagnitude, 0, 0), asImpulse: false)
         playMoveSound()
+        tankModel.eulerAngles = SCNVector3(0,0,0)
+        facingRight = true
     }
     
     func playMoveSound(){

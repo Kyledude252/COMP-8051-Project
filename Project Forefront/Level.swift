@@ -10,6 +10,7 @@ import SceneKit
 
 class Level: SCNNode {
     let squareSize: CGFloat = 0.5
+    
     let numRows: Int
     let numCols: Int
     var cubeGrid: [[SCNNode?]]?
@@ -29,6 +30,8 @@ class Level: SCNNode {
     let blockColourTealGrey = UIColor(red: 27/255, green: 55/255, blue: 70/255, alpha: 1.0)
 
     let blockColourTealSurface = UIColor(red: 100/255, green: 125/255, blue: 150/255, alpha: 1.0)
+    let blockColourTealSurface2 = UIColor(red: 40/255, green: 65/255, blue: 90/255, alpha: 1.0)
+    let blockColourTealSurface3 = UIColor(red: 60/255, green: 85/255, blue: 110/255, alpha: 1.0)
 
 
     
@@ -56,19 +59,32 @@ class Level: SCNNode {
     }
     
     private func setupLevel() {
-        let topMaterial = SCNMaterial()
-        let sideMaterial = SCNMaterial()
-        topMaterial.diffuse.contents = blockColourTealSurface
-        sideMaterial.diffuse.contents = blockColourTealGrey
+        let material1 = SCNMaterial()
+        let material2 = SCNMaterial()
+        let material3 = SCNMaterial()
+        material1.diffuse.contents = blockColourTealGrey
+        material2.diffuse.contents = blockColourTealSurface2
+        material3.diffuse.contents = blockColourTealSurface3
 
         for col in 0..<numCols {
             for row in 0..<numRows {
 //                for row in stride(from: 0, to: numRows, by: 2) {
 //                    for col in stride(from: 0, to: numCols, by: 2) {
                 if(levelGenerator(row: row, col: col)){
-                    let materials = [sideMaterial, sideMaterial, sideMaterial, sideMaterial, (row == 0) ? topMaterial : sideMaterial, sideMaterial]
+                    var materials = [SCNMaterial]()
+                    var rand = Float.random(in: 0...100)
+                    if rand <= 1 {
+                        materials = [material1, material1,material1,material1,material2,material1]
+                    } else if rand > 1 && rand <= 2 {
+                        materials = [material1, material1,material1,material1,material3,material1]
+                        }else{
+                        materials = [material1, material1,material1, material1,material1,material1]
+                    }
                     
-                    let squareNode = LevelSquare(squareSize: squareSize,
+                    // true height is actually on z axis (length)
+                    // giving 3d effect
+                    let trueHeight = currentHeight * 0.004 * CGFloat(row)/6*5
+                    let squareNode = LevelSquare(squareWidth: squareSize, squareHeight: trueHeight, squareLength: squareSize,
                                                  position: SCNVector3(CGFloat(col) * squareSize, -CGFloat(row) * squareSize, 0),
                                                  materials: materials)
                     

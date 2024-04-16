@@ -11,10 +11,10 @@ import SceneKit
 class LevelSquare: SCNNode {
     var size: Int = 1
     
-    init(squareSize: CGFloat, position: SCNVector3, materials: [SCNMaterial]) {
+    init(squareWidth: CGFloat, squareHeight: CGFloat, squareLength: CGFloat, position: SCNVector3, materials: [SCNMaterial]) {
             super.init()
             
-            let squareGeometry = SCNBox(width: squareSize, height: squareSize, length: squareSize, chamferRadius: 0)
+            let squareGeometry = SCNBox(width: squareWidth, height: squareHeight, length: squareLength, chamferRadius: 0)
             geometry = squareGeometry
         
         

@@ -110,7 +110,7 @@ class Tank: SCNNode {
     }
     
     func moveUpward() {
-        let forceMagnitude: Float = 300
+        let forceMagnitude: Float = 180
         tankPhysicsBody?.applyForce(SCNVector3(0, forceMagnitude, 0), asImpulse: false)
         playJumpSound()
     }

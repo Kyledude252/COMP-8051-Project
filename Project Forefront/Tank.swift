@@ -13,12 +13,13 @@ class Tank: SCNNode {
     var currentSpeed: Float = 0.0
     var maxHealth: Int = 100
     var health: Int = 100
-    let healthBar = SCNNode()
+    let maxHealthNode = SCNNode()
     var size: Int = 1
     var currentSoundPlayer: SCNAudioPlayer?
     var tankMaterial = SCNMaterial()
     var tankModel = SCNNode()
     var facingRight = true
+    let barWidth = 2.0
     
     private var tankPhysicsBody: SCNPhysicsBody?
     
@@ -44,12 +45,20 @@ class Tank: SCNNode {
         
         // Temporary implementation, to be replaced by asset
         let healthNumbers = SCNText(string: String(format: "%d/%d", health, maxHealth), extrusionDepth: 0.0)
-        healthBar.geometry = healthNumbers
-        healthBar.scale = SCNVector3(0.2, 0.2, 0.2)
-        healthBar.position = SCNVector3(-4, 1, 0)
-        healthNumbers.firstMaterial?.diffuse.contents = UIColor.black
+        let healthBar = SCNPlane(width: barWidth, height: 0.4)
+        let maxHealthBar = SCNPlane(width: barWidth, height: 0.4)
+        let healthNode = SCNNode(geometry: healthBar)
+        maxHealthNode.position = SCNVector3(0, 1, 0)
+
+        healthNode.name = "HP"
+        maxHealthNode.geometry = maxHealthBar
+        healthNode.position = SCNVector3(0, 0, 0.01)
+        healthBar.firstMaterial?.diffuse.contents = UIColor.green
+        maxHealthBar.firstMaterial?.diffuse.contents = UIColor.red
         
-        self.addChildNode(healthBar)
+        maxHealthNode.addChildNode(healthNode)
+        self.addChildNode(maxHealthNode)
+        
         setupPhysics()
     }
     
@@ -92,7 +101,7 @@ class Tank: SCNNode {
     
     func playMoveSound(){
         if let currentSoundPlayer = currentSoundPlayer {
-            currentSoundPlayer.audioSource?.volume = 0.01
+            currentSoundPlayer.audioSource?.volume = 0.001
         }
         
         guard let tankSource = SCNAudioSource(named: "TankMoving.mp3") else {
@@ -142,12 +151,17 @@ class Tank: SCNNode {
             health = 0
         }
         
+        let widthPct = Double(health) / Double(maxHealth) * barWidth
         
-        let healthNumbers = SCNText(string: String(format: "%d/%d", health, maxHealth), extrusionDepth: 0.0)
-        healthNumbers.firstMaterial?.diffuse.contents = UIColor.black
-        
+        var currentHealth = maxHealthNode.childNode(withName: "HP", recursively: true)
+        currentHealth?.removeFromParentNode()
 
-        healthBar.geometry = healthNumbers
+        let newHealth = SCNNode(geometry: SCNPlane(width: widthPct, height: 0.4))
+        newHealth.position = SCNVector3(0.5*(widthPct-2), 0, 0.001)
+        newHealth.geometry?.firstMaterial?.diffuse.contents = UIColor.green
+        newHealth.name = "HP"
+
+        maxHealthNode.addChildNode(newHealth)
     }
     
     func getHealth() -> Int {

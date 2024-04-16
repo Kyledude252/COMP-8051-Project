@@ -124,10 +124,12 @@ struct SceneKitView: UIViewControllerRepresentable {
         }
         
         func setupPicker(on view: SCNView) {
-            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 70, width: 100, height: 60))
+            let pickerView = UIPickerView(frame: CGRect(x: 20, y: 75, width: 100, height: 60))
             pickerView.delegate = self
             pickerView.dataSource = self
-            pickerView.backgroundColor = .green
+            pickerView.backgroundColor = UIColor(red: 0.30, green: 0.50, blue: 0.30, alpha: 1.0)
+            pickerView.tintColor = UIColor.white
+            pickerView.layer.cornerRadius = 10
             view.addSubview(pickerView)
             weapons = pickerView
             
@@ -153,7 +155,8 @@ struct SceneKitView: UIViewControllerRepresentable {
         func setupPause(on view: SCNView) {
             let button = UIButton(frame: CGRect(x: 205, y: 20, width: 100, height: 50))
             //button color, tittle, action
-            button.backgroundColor = .blue
+            button.backgroundColor = UIColor(red: 0.25, green: 0.25, blue: 0.45, alpha: 1.0)
+            button.layer.cornerRadius = 10
             button.setTitle("Pause", for: .normal)
             button.addTarget(self, action: #selector(pauseGame), for:.touchUpInside)
             view.addSubview(button)
@@ -164,7 +167,8 @@ struct SceneKitView: UIViewControllerRepresentable {
         func setupFireButton(on view: SCNView) {
             let button = UIButton(frame: CGRect(x: 20, y: 20, width: 100, height: 50))
             //button color, tittle, action
-            button.backgroundColor = .blue
+            button.backgroundColor = UIColor(red: 0.35, green: 0.35, blue: 0.65, alpha: 1.0)
+            button.layer.cornerRadius = 10
             button.setTitle("Move Mode", for: .normal)
             button.addTarget(self, action: #selector(toggleFire), for:.touchUpInside)
             view.addSubview(button)
@@ -176,7 +180,7 @@ struct SceneKitView: UIViewControllerRepresentable {
             if let button = toggleButton {
                 if button.title(for: .normal) == "Fire Mode" {
                     button.setTitle("Move Mode", for: .normal)
-                    button.backgroundColor = .blue
+                    button.backgroundColor = UIColor(red: 0.35, green: 0.35, blue: 0.65, alpha: 1.0)
                     //toggles fire mode off
                     fireModeOn = false
                     //removes line drawn, another safeguard to remove this artifact
@@ -185,7 +189,7 @@ struct SceneKitView: UIViewControllerRepresentable {
                     mainScene.toggleTankMove(move: true)
                 } else if button.title(for: .normal) == "Move Mode" {
                     button.setTitle("Fire Mode", for: .normal)
-                    button.backgroundColor = .red
+                    button.backgroundColor = UIColor(red: 0.65, green: 0.20, blue: 0.20, alpha: 1.0)
                     fireModeOn = true //toggles fire mode on
                     mainScene.toggleTankMove(move: false)
                 }

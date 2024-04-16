@@ -653,11 +653,25 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     ///------------------------------------------------
     // used to set-up text for ammunition
     func setUpAmmo() {
-        let ammoText = SCNText(string: "shots: \(ammunition)", extrusionDepth: 0.0)
-        ammoText.font = UIFont.systemFont(ofSize: 3)
+        let ammoBkg = SCNPlane(width: 9.5, height: 3)
+        ammoBkg.cornerRadius = 0.8
+        let bkgNode = SCNNode(geometry: ammoBkg)
+        bkgNode.geometry?.firstMaterial?.diffuse.contents = UIColor(red: 0.25, green: 0.25, blue: 0.45, alpha: 1.0)
+        
+        let ammoCircle = SCNPlane(width: 1.8, height: 1.8)
+        ammoCircle.cornerRadius = ammoCircle.width/2
+        let circleNode = SCNNode(geometry: ammoCircle)
+        circleNode.geometry?.firstMaterial?.diffuse.contents = UIColor.green
+
+        let ammoText = SCNText(string: "Shots:", extrusionDepth: 0.0)
+        ammoText.font = UIFont.systemFont(ofSize: 2)
         ammoNode = SCNNode(geometry: ammoText)
-        ammoNode?.geometry?.firstMaterial?.diffuse.contents = UIColor.red
-        ammoNode!.position = SCNVector3(-40, 10, 1)
+        ammoNode?.geometry?.firstMaterial?.diffuse.contents = UIColor.white
+        ammoNode!.position = SCNVector3(-37.6, -5, 10)
+        circleNode.position = SCNVector3(7, 1.85, 0)
+        bkgNode.position = SCNVector3(3.7, 2, -0.01)
+        ammoNode?.addChildNode(circleNode)
+        ammoNode?.addChildNode(bkgNode)
         self.rootNode.addChildNode(ammoNode!)
     }
     // sets ammo to one, can be changed later to add different ammo for different weapon types
@@ -666,8 +680,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         print("Got ammo, Ammunition: ", ammunition)
         //update screen display
         if let textGeo = ammoNode?.geometry as? SCNText {
-            textGeo.string = "shots: \(ammunition)"
+            textGeo.string = "Shots:"
         }
+        ammoNode?.childNodes.first?.geometry?.firstMaterial?.diffuse.contents = UIColor.green
     }
     // sets ammo to 0, can be changed later
     func removeAmmo() {
@@ -675,8 +690,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         print("lost ammo, Ammunition: ", ammunition)
         // update screen display
         if let textGeo = ammoNode?.geometry as? SCNText {
-            textGeo.string = "shots: \(ammunition)"
+            textGeo.string = "Shots:"
         }
+        ammoNode?.childNodes.first?.geometry?.firstMaterial?.diffuse.contents = UIColor.red
     }
 
     //------------------------------------------------------------------------------------------------

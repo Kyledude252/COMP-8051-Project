@@ -8,6 +8,7 @@
 import Foundation
 import SceneKit
 
+
 class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
@@ -32,6 +33,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var levelNode = Level(levelWidth: 1, levelHeight: 1)
     
     var projectileShot = false
+    
+    var projectileJustShot = false
+    
+    var tank1Position = SCNVector3(0,0,0)
+    
+    var tank2Position = SCNVector3(0,0,0)
     
     //grab view
     weak var scnView: SCNView?
@@ -97,8 +104,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         //Used for firing once per turn
         setUpAmmo()
         
-        player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red)
-        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .green)
+        player1Tank = Tank(position: SCNVector3(-20, groundPosition, 0), color: .red, name: "Tank1")
+        player2Tank = Tank(position: SCNVector3(20, groundPosition, 0), color: .green, name: "Tank2")
         
         rootNode.addChildNode(player1Tank)
         rootNode.addChildNode(player2Tank)
@@ -254,9 +261,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     func moveActivePlayerTankLeft() {
         // If player is not allowed to move, function is disabled
-        if (canMove == false) {
-            return
-        }
+        //if (canMove == false) {
+        //    return
+        //}
         tankMovingLeft = true
         tankMovingRight = false
         movementPlayerSteps -= 1
@@ -265,9 +272,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     func moveActivePlayerTankRight() {
         // If player is not allowed to move, function is disabled
-        if (canMove == false) {
-            return
-        }
+        //if (canMove == false) {
+        //    return
+        //}
         tankMovingRight = true
         tankMovingLeft = false
         movementPlayerSteps -= 1
@@ -277,9 +284,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     @MainActor
     func moveActivePlayerTankVertically(){
         // If player is not allowed to move, function is disabled
-        if (canMove == false) {
-            return
-        }
+        //if (canMove == false) {
+        //    return
+        //}
         if activePlayer == 1  && player1Tank.getHealth() > 0 {
             if(playerBoostCount > 0){
                 player1Tank.moveUpward()
@@ -448,6 +455,33 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         // Set the new line node
         self.lineNode = lineNode
         self.rootNode.addChildNode(lineNode)
+        
+        //Angle the tank turret
+        
+        let dx = endPoint.x - startPoint.x
+        let dy = endPoint.y - startPoint.y
+        var angle = atan2(dy, dx)
+        let playerTank = activePlayer == 1 ? player1Tank : player2Tank
+        
+        if(abs(angle) > Float.pi/2){
+            playerTank?.tankModel.eulerAngles = SCNVector3(0,Double.pi,0)
+            playerTank?.facingRight = false
+        }else{
+            playerTank?.tankModel.eulerAngles = SCNVector3(0,0,0)
+            playerTank?.facingRight = true
+        }
+        
+        if(!playerTank!.facingRight){
+            angle = atan2(dy, startPoint.x - endPoint.x)
+        }
+        
+        let turretNode = playerTank?.tankModel.childNode(withName: "Gun", recursively: true)
+        turretNode?.eulerAngles = SCNVector3(-angle,.pi/2,0)
+        
+
+        
+        
+        
     }
 
     // type:
@@ -467,7 +501,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             // need offset to avoid physics
             // might need to edit this value later to change interactions
-            let offsetFactor: Float = 0.06
+            let offsetFactor: Float = 0.8
             let offsetStartingPosition = SCNVector3(startPoint.x + (direction.x * offsetFactor), startPoint.y + (direction.y * offsetFactor), startPoint.z + direction.z * offsetFactor)
             
             let lightOffsetFactor: Float = 0.01
@@ -490,6 +524,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
             //Use to remove later
             projectileStore.addChildNode(projectile!)
+            
             
             //Add scalar, edit as needed, maybe add to paramter later for different shots
             let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
@@ -550,7 +585,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             }
             
             playShootSound()
-
+            // shot shake (smaller)
+            cameraShake(duration: 0.50, intensity: 0.2)
             
             // For freezing turn
             projectileIsFlying = true
@@ -560,7 +596,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             // fired shot, therefore used ammo
             removeAmmo()
             projectileShot = true
+            projectileJustShot = true
             playerBoostCount=10
+            
+            Task { try! await Task.sleep(nanoseconds:20000000)
+                projectileJustShot = false
+            }
         }
     }
     
@@ -669,7 +710,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             //print("explosion radius: ", explosionRadius)
             doExpLight(contact: contact)
             levelNode.explode(pos: contact.nodeA.position, rad: explosionRadius)
-            
+            cameraShake(duration: 2.0, intensity: 0.50)
             
 
             let dx1 = contact.contactPoint.x - player1Tank.presentation.worldPosition.x
@@ -712,10 +753,71 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
         }else if contactMask == (PhysicsCategory.tank | PhysicsCategory.projectile){
             //Tank specific collision if we do that
+            
+            if (!projectileJustShot) {
+                //Check flag for freezing timer
+                projectileIsFlying = false
+                semaphore.signal()
+                //print("explosion radius: ", explosionRadius)
+                doExpLight(contact: contact)
 
+                let dx1 = contact.contactPoint.x - player1Tank.presentation.worldPosition.x
+                let dz1 = contact.contactPoint.z - player1Tank.presentation.worldPosition.z
+                let dx2 = contact.contactPoint.x - player2Tank.presentation.worldPosition.x
+                let dz2 = contact.contactPoint.z - player2Tank.presentation.worldPosition.z
+                //idk
+                let halfOfExpRadius = Float(Double(explosionRadius) / 2.0)
+                if(contact.nodeA.name == "Tank1" && contact.nodeB.parent != nil){
+                    //NOTE distance is set to 5 to line up with explosion side of 10, since the level blocks are 0.5 scale. If we have different explosion sizes or change the scale of the cubes the distance here should be explosionSize*LevelCubeScale. Something to change later when we make different explosives with different sizes and figure out that system.
+                    levelNode.explode(pos: tank1Position, rad: explosionRadius)
+                    player1Tank.decreaseHealth(damage: self.damage * 2)
+                    let forceMagnitude: Float = 60
+                    player1Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                    if (sqrt(dx2*dx2+dz2+dz2) < halfOfExpRadius) {
+                        player2Tank.decreaseHealth(damage: self.damage)
+                        let forceMagnitude: Float = 60
+                        player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                    }
+                }
+                if(contact.nodeA.name == "Tank2" && contact.nodeB.parent != nil){
+                    levelNode.explode(pos: tank2Position, rad: explosionRadius)
+                    player2Tank.decreaseHealth(damage: self.damage * 2)
+                    let forceMagnitude: Float = 60
+                    player2Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                    if (sqrt(dx1*dx1+dz1+dz1) < halfOfExpRadius) {
+                        player1Tank.decreaseHealth(damage: self.damage)
+                        let forceMagnitude: Float = 60
+                        player1Tank.physicsBody?.applyForce(SCNVector3(0, -forceMagnitude, 0), asImpulse: false)
+                    }
+                }
+                if(contact.nodeB.parent != nil){
+                    
+                    checkDeadCondition()
+                    
+                    guard let explodeSource = SCNAudioSource(named: "explosion.wav") else {
+                        print("Failed to load explosion.mp3")
+                        return
+                    }
+                    
+                    explodeSource.loops = false
+                    explodeSource.volume = 0.3
+                    explodeSource.isPositional = false
+                    explodeSource.load()
+                    let explodeFX = SCNAudioPlayer(source: explodeSource)
+                    rootNode.addAudioPlayer(explodeFX)
+                    print("ADDED EXPLOSION")
+                    cameraShake(duration: 2.0, intensity: 0.50)
+                }
+                
+                contact.nodeB.removeFromParentNode()
+            }
+        }  else if contactMask == (PhysicsCategory.levelSquare | PhysicsCategory.tank) {
+            if (contact.nodeB.name == "Tank1") {
+                tank1Position = contact.nodeA.position
+            } else if (contact.nodeB.name == "Tank2") {
+                tank2Position = contact.nodeA.position
+            }
         }
-        
-
     }
     
     func doExpLight(contact: SCNPhysicsContact) {
@@ -961,6 +1063,44 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
 
         }
     }
+    
+    func cameraShake (duration: TimeInterval, intensity: Float){
+        let originalPosition = cameraNode.position
+        
+        let numShakeActions = Int(duration / 0.2)
+        
+        var shakeActions: [SCNAction] = []
+        
+        
+        let intensityDecayRate = intensity / Float(numShakeActions)
+        var currentIntensity = intensity
+        
+        for _ in 0..<numShakeActions {
+                // Generate random offsets
+                let offsetX = Float.random(in: -currentIntensity...currentIntensity)
+                let offsetY = Float.random(in: -currentIntensity/2...currentIntensity/2)
+                let offsetZ = Float.random(in: -currentIntensity/2...currentIntensity/2)
+                
+            let shakeAction1 = SCNAction.move(by: SCNVector3(offsetX, offsetY, offsetZ), duration: 0.1)
+            let shakeAction2 = SCNAction.move(by: SCNVector3(-offsetX * 2, -offsetY * 2, -offsetZ * 2), duration: 0.1)
+                
+                shakeActions.append(shakeAction1)
+                shakeActions.append(shakeAction2)
+            
+            currentIntensity -= intensityDecayRate
+
+            }
+        
+        // ease back after
+        let easeBackAction = SCNAction.move(to: originalPosition, duration: 0.5)
+        shakeActions.append(easeBackAction)
+        
+        let shakeSequence = SCNAction.sequence(shakeActions)
+            
+            cameraNode.runAction(shakeSequence) {
+                self.cameraNode.position = originalPosition
+            }
+    }
 
 
     // PHYSICS // /////////////
@@ -983,6 +1123,8 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         // Implement collision handling logic here
        
     }
+    
+
 }
 
 

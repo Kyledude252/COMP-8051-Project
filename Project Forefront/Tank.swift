@@ -295,9 +295,6 @@ class Tank: SCNNode {
         tankPhysicsBody?.contactTestBitMask = PhysicsCategory.levelSquare
         tankPhysicsBody?.contactTestBitMask = PhysicsCategory.projectile
         
-        
-        
-        
         applyZPositionConstraint(to: self)
         
         self.physicsBody = tankPhysicsBody

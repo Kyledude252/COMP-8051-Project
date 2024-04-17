@@ -1,15 +1,20 @@
-//
-//  Projectile.swift
-//  Project Forefront
-//
-//  Created by user on 3/29/24.
-//
-
 import Foundation
 import SceneKit
 
+
+/**
+ Class representing a Projectile.
+ 
+ Projectile inherits from SCNNode.
+ */
 class Projectile: SCNNode {
     
+    
+    /**
+     Constructor for the Projectile.
+     
+     - parameter startPoint: an SCNVector3 representing the starting point of the projectile's trajectory.
+     */
     init(from startPoint: SCNVector3) {
         super.init()
         
@@ -43,6 +48,14 @@ class Projectile: SCNNode {
 
     }
     
+    
+    /**
+     NSCoding Initializer - Unused
+     
+     - parameter aDecoder: NSCoder used for decoding a serialized Projectile object.
+     
+     Required
+     */
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

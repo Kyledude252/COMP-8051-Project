@@ -624,6 +624,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         } else {
             projectile?.physicsBody?.applyForce(force, asImpulse: true)
         }
+        
+        
+        projectileJustShot = true
+        
+        Task { try! await Task.sleep(nanoseconds:50000000)
+            projectileJustShot = false
+        }
     }
     
     // removes line drawn for trajectory

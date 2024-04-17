@@ -11,7 +11,7 @@ class Projectile: SCNNode {
     
     
     /**
-     Constructor for the Projectile.
+     Constructor for a Projectile.
      
      - parameter startPoint: an SCNVector3 representing the starting point of the projectile's trajectory.
      */

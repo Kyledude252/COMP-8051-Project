@@ -13,7 +13,7 @@ class GameViewController: UIViewController {
     
 
     /**
-     Constructor for the GameViewController.
+     Constructor for a GameViewController.
      
      - parameter scene: the scene to initialize.
      */

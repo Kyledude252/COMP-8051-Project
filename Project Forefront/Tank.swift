@@ -25,7 +25,7 @@ class Tank: SCNNode {
     
     
     /**
-     Constructor for a tank object.
+     Constructor for a tank.
      
      - parameter position: A SCNVector3 representing the position of a tank object in a scene.
      - parameter color: A UIColor representing the color of the tank.

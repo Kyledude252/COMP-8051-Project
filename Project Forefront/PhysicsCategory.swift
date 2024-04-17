@@ -1,23 +1,19 @@
-//
-//  PhysicsCategory.swift
-//  Project Forefront
-//
-//  Created by user on 3/5/24.
-//
-
 import Foundation
 
+
+/**
+ Struct for defining the categories of physics objects.
+ */
 struct PhysicsCategory{
-    
+    /// Non-physics objects.
     static let none = 0
-    static let tank = 1 << 0
-    static let levelSquare = 1 << 1
-    static let projectile = 1 << 2
     
-    /*
-    case none = 0
-    case tank = 1
-    case levelSquare = 2
-    case projectile = 3
-    */
+    /// Tank physics objects.
+    static let tank = 1 << 0
+    
+    /// LevelSquare physics objects.
+    static let levelSquare = 1 << 1
+    
+    /// Projectile physics objects.
+    static let projectile = 1 << 2
 }

@@ -1,25 +1,19 @@
-//
-//  ContentView.swift
-//  Project Forefront
-//
-//  Created by Kyle Alexander on 2024-01-31.
-//
-
 import SwiftUI
 import SceneKit
 import SpriteKit
 
-// THIS PAGE CONTAINS:
-// CONTENT VIEW
-// START SCREEN UI
-// GESTURE CONFIG
-// BUTTON STYLING AND CONFIG
 
 private var moveLeft = false
 private var moveRight = false
 private var aimRotateLeft = false
 private var aimRotateRight = false
 
+
+/**
+ Struct containing the structure of the views for the app.
+ 
+ ContentView inherits from View.
+ */
 struct ContentView: View {
     @StateObject var mainSceneViewModel = MainSceneViewModel()
     @StateObject var statsSceneViewModel = StatsSceneViewModel()
@@ -98,29 +92,8 @@ struct ContentView: View {
                 }
                 .buttonStyle(ButtonTap())
                 
-                //                Button(action: mainSceneViewModel.handleAimRotateLeft) {
-                //                    Text("AimRotateLeft").frame(maxWidth: .infinity, minHeight: 80)
-                //                }.buttonStyle(ButtonToggle(which: 2))
-                //
-                //                Button(action: mainSceneViewModel.handleAimRotateRight) {
-                //                    Text("AimRotateRight").frame(maxWidth: .infinity, minHeight: 80)
-                //                }.buttonStyle(ButtonToggle(which: 3))
-                //
-                //                VStack {
-                //                    Text("POWER: \(sliderValue, specifier: "%.2f")")
-                //                        .padding()
-                //
-                //                    Slider(value: $sliderValue, in: 0...1, step: 0.1)
-                //                        .onChange(of: sliderValue) { newValue in
-                //                            mainSceneViewModel.handleAdjustPower(powerLevel: newValue)
-                //                        }
-                //                }
-                //
-                //                Button(action: mainSceneViewModel.handleFire) {
-                //                    Text("Fire!").frame(maxWidth: .infinity, minHeight: 80)
-                //                }.buttonStyle(ButtonToggle(which: 3))
-                //
                 Spacer(minLength: 5)
+                
                 HStack(spacing: 5) {
                     ForEach(0..<2, id: \.self) { row in
                         VStack(spacing: 2) {
@@ -134,8 +107,8 @@ struct ContentView: View {
                     }
                 }
  
-                
                 Spacer(minLength: 200)
+                
                 VStack(spacing: 2) {
                     ForEach((0..<totalBoosts).reversed(), id: \.self) { index in
                         Circle()
@@ -143,21 +116,13 @@ struct ContentView: View {
                             .frame(width: 10, height: 10)
                     }
                 }
+                
                 Spacer(minLength: 5)
 
-                
-                
-                // Temporary button to debug damage
                 Button(action: mainSceneViewModel.rocketBoost) {
                     Text("Rocket\nBoost").frame(maxWidth: .infinity, minHeight: 60)
                 }.buttonStyle(ButtonTap())
-
-                // Swapped to turn end
-                //                Button(action: mainSceneViewModel.scene.levelNode.randomExplosion) {
-                //                    Text("Random Explosion").frame(maxWidth: .infinity, minHeight: 60)
-                //                }.buttonStyle(ButtonTap())
-
-                // turn end
+                
                 Button(action: mainSceneViewModel.endTurn) {
                     Text("End Turn").frame(maxWidth: .infinity, minHeight: 60)
                 }.buttonStyle(ButtonTap())
@@ -179,8 +144,6 @@ struct ContentView: View {
             .cornerRadius(10)
             .padding()
             .edgesIgnoringSafeArea(.all)
-            
-
         } else {
             StartScreenView(startAction: {
                 isGameStarted = true
@@ -197,14 +160,10 @@ struct ContentView: View {
     }
 }
 
-// Main menu // /////////////
-//- good enough for now
-// Brainstorm (perhaps):
-// -- Allow player name entry
-// -- Add cool art or animation
-// -- See high scores
-// * Add tank models from game art class
 
+/**
+ A struct containing the structure of the main menu.
+ */
 struct StartScreenView: View {
     var startAction: () -> Void
     var statsAction: () -> Void
@@ -274,7 +233,12 @@ struct StartScreenView: View {
     }
 }
 
-// BUTTONS // ////////////
+
+/**
+ Struct for styling the tap buttons.
+ 
+ ButtonTap inherits from ButtonStyle.
+ */
 struct ButtonTap: ButtonStyle {
     typealias Body = Button
     
@@ -296,6 +260,12 @@ struct ButtonTap: ButtonStyle {
     }
 }
 
+
+/**
+ Struct for styling the toggle button.
+ 
+ ButtonToggle inherits from ButtonStyle.
+ */
 struct ButtonToggle: ButtonStyle {
     @State var which: Int
     typealias Body = Button
@@ -309,8 +279,6 @@ struct ButtonToggle: ButtonStyle {
                 moveRight = !moveRight
             case 3:
                 aimRotateLeft = !aimRotateLeft
-                //            case 4:
-                //                aimRotateRight = !aimRotateRight
             default:
                 aimRotateRight = !aimRotateRight
             }
@@ -375,4 +343,3 @@ struct ButtonToggle: ButtonStyle {
         }
     }
 }
-

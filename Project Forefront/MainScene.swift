@@ -261,9 +261,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     func moveActivePlayerTankLeft() {
         // If player is not allowed to move, function is disabled
-        //if (canMove == false) {
-        //    return
-        //}
+        if (canMove == false) {
+            return
+        }
         tankMovingLeft = true
         tankMovingRight = false
         movementPlayerSteps -= 1
@@ -271,10 +271,10 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
     
     func moveActivePlayerTankRight() {
-        // If player is not allowed to move, function is disabled
-        //if (canMove == false) {
-        //    return
-        //}
+        //If player is not allowed to move, function is disabled
+        if (canMove == false) {
+            return
+        }
         tankMovingRight = true
         tankMovingLeft = false
         movementPlayerSteps -= 1
@@ -284,9 +284,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     @MainActor
     func moveActivePlayerTankVertically(){
         // If player is not allowed to move, function is disabled
-        //if (canMove == false) {
-        //    return
-        //}
+        if (canMove == false) {
+            return
+        }
         if activePlayer == 1  && player1Tank.getHealth() > 0 {
             if(playerBoostCount > 0){
                 player1Tank.moveUpward()

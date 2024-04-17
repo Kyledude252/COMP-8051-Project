@@ -501,7 +501,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             // need offset to avoid physics
             // might need to edit this value later to change interactions
-            let offsetFactor: Float = 0.05
+            let offsetFactor: Float = 0.07
             let offsetStartingPosition = SCNVector3(startPoint.x + (direction.x * offsetFactor), startPoint.y + (direction.y * offsetFactor), startPoint.z + direction.z * offsetFactor)
             
             let lightOffsetFactor: Float = 0.01

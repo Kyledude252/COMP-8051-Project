@@ -4,7 +4,7 @@ import SceneKit
 /**
  Class representing a tank object.
  
- The tank class is a modified SCNNode object.
+ Tank class inherits from SCNNode.
  */
 class Tank: SCNNode {
     var moveSpeed: Float = 0.1
@@ -74,6 +74,8 @@ class Tank: SCNNode {
      NSCoding Initializer - Unused
      
      - parameter aDecoder: NSCoder used for decoding a serialized tank object.
+     
+     Required
      */
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

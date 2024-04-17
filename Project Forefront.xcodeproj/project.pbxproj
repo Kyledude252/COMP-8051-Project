@@ -100,10 +100,10 @@
 				CEE97D0D2B8F8F37002F0962 /* Level.swift */,
 				CECC0F382B980B4D00EA0F02 /* PhysicsCategory.swift */,
 				CEE97D0F2B8FD052002F0962 /* LevelSquare.swift */,
+				589E76D22BBA1FDF0056C2B2 /* StatsSceneViewModel.swift */,
 				3650F0702B6AEE7A0076D527 /* Assets.xcassets */,
 				36D638502BBA699700B8913C /* Audio */,
 				3650F0722B6AEE7A0076D527 /* Preview Content */,
-				589E76D22BBA1FDF0056C2B2 /* StatsSceneViewModel.swift */,
 				36B236AE2BCED1970085D6A7 /* Tank.dae */,
 			);
 			path = "Project Forefront";

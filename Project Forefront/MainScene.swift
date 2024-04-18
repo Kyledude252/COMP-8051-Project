@@ -528,17 +528,14 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             //Add scalar, edit as needed, maybe add to paramter later for different shots
             let forceVector = SCNVector3(direction.x*3, direction.y*3, direction.z)
+            let forceVectorMagnitude = sqrt(pow(forceVector.x, 2)+pow(forceVector.y, 2)+pow(forceVector.z, 2));
             
-            // used to dampen if going to far
-            var dampingFactor: Float = 0.1
+            var dampingFactor: Float = 1.0
             
-            if(forceVector.x >= maxProjectileX || forceVector.y >= maxProjectileY || forceVector.x <= -maxProjectileX || forceVector.y <= -maxProjectileY) {
-                if (abs(forceVector.x) > abs(forceVector.y)) {
-                    dampingFactor = 15 / abs(forceVector.x)
-                } else {
-                    dampingFactor = 15 / abs(forceVector.y)
-                }
-            }
+            // magnitude of a <15,15> vector
+            let maxVectorMagnitude: Float = sqrt(2) * 15.0
+            
+            dampingFactor = maxVectorMagnitude / forceVectorMagnitude
             
             //Dampen if going to far
             let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
@@ -552,7 +549,7 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 explosionRadius = 10
                 damage = 10
                 print("Type 1 shot fired")
-                if(forceVector.x >= 15 || forceVector.y >= 15) {
+                if(forceVectorMagnitude > maxVectorMagnitude) {
                     projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
                 } else {
                     projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
@@ -571,14 +568,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0 * Double(i)) {
                         self.launchHelper(start: offsetStartingPosition, force: forceVector, dampForce: dampenedForceVector)
                     }
-                }
-            } else if (type == 4) {
-                explosionRadius = 40
-                damage = 50
-                if(forceVector.x >= 15 || forceVector.y >= 15) {
-                    projectile?.physicsBody?.applyForce(dampenedForceVector, asImpulse: true)
-                } else {
-                    projectile?.physicsBody?.applyForce(forceVector, asImpulse: true)
                 }
             } else {
                 //just fires basic shot if no inptu for some reason
@@ -619,12 +608,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                     print("\nForce vector: \(force) ")
                     print("\ndampened: \(dampForce) ")
 
-        if(force.x >= 15 || force.y >= 15) {
+        let fMag = sqrt(pow(force.x, 2)+pow(force.y, 2)+pow(force.z, 2));
+        let dMag = sqrt(pow(dampForce.x, 2)+pow(dampForce.y, 2)+pow(dampForce.z, 2));
+        if(fMag > dMag) {
             projectile?.physicsBody?.applyForce(dampForce, asImpulse: true)
         } else {
             projectile?.physicsBody?.applyForce(force, asImpulse: true)
         }
-        
         
         projectileJustShot = true
         

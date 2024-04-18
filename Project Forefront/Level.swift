@@ -1,13 +1,12 @@
-//
-//  LevelNode.swift
-//  Project Forefront
-//
-//  Created by user on 2/28/24.
-//
-
 import Foundation
 import SceneKit
 
+
+/**
+ Class representing a Level.
+ 
+ Level inherits from SCNNode.
+ */
 class Level: SCNNode {
     let squareSize: CGFloat = 0.5
     
@@ -34,7 +33,12 @@ class Level: SCNNode {
     let blockColourTealSurface3 = UIColor(red: 60/255, green: 85/255, blue: 110/255, alpha: 1.0)
 
 
-    
+    /**
+     Constructor for a Level.
+     
+     - parameter levelWidth: a CGFloat for the level width.
+     - parameter levelHeight: a CGFloat for the level height.
+     */
     init(levelWidth: CGFloat, levelHeight: CGFloat) {
         self.numCols = Int(levelWidth / squareSize)
         self.numRows = Int(levelHeight / squareSize)
@@ -54,10 +58,24 @@ class Level: SCNNode {
 
     }
     
+    
+    /**
+     NSCoding Initializer - Unused
+     
+     - parameter aDecoder: NSCoder used for decoding a serialized Levelobject.
+     
+     Required
+     */
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    
+    /**
+     Function for setting up the Level geometry.
+     
+     Level.init()
+     */
     private func setupLevel() {
         let material1 = SCNMaterial()
         let material2 = SCNMaterial()
@@ -68,8 +86,6 @@ class Level: SCNNode {
 
         for col in 0..<numCols {
             for row in 0..<numRows {
-//                for row in stride(from: 0, to: numRows, by: 2) {
-//                    for col in stride(from: 0, to: numCols, by: 2) {
                 if(levelGenerator(row: row, col: col)){
                     var materials = [SCNMaterial]()
                     var rand = Float.random(in: 0...100)
@@ -98,6 +114,18 @@ class Level: SCNNode {
         }
     }
     
+    
+    /**
+     Function to handle the instancing of tiles.
+     
+     - parameter row: row in cubeGrid
+     - parameter col: column in cubeGrid
+     - returns: a Bool representing whether the LevelSquare is to be constructed.
+     
+     Called by:
+     
+     Level.setupLevel()
+     */
     func levelGenerator(row: Int, col: Int) -> Bool{
         if(col > currentCol){
             currentCol = col
@@ -118,6 +146,19 @@ class Level: SCNNode {
         return Double(row) > currentHeight
     }
     
+    
+    /**
+     Function to handle the deletion of LevelSquares.
+     
+     - parameter col: Int of col in the cubeGrid.
+     - parameter row: Int of row in the cubeGrid.
+     - parameter radius: Int of radius around point in grid to delete.
+     
+     Called by:
+     
+     Level.explode(),
+     Level.randomExplosion()
+     */
     func deleteCubes(col: Int, row: Int, radius: Int){
         let rowMin = max(row - radius, 0)
         let rowMax = min(row + radius, numRows - 2)
@@ -136,6 +177,10 @@ class Level: SCNNode {
         //cubeGrid![col][row]?.removeFromParentNode()
     }
     
+    
+    /**
+     Debug function that performs a randomly positioned and sized explosion.
+     */
     func randomExplosion() {
         let size = Int.random(in: 3...20)
         let posY = Int.random(in: 1...numRows-1)
@@ -143,10 +188,29 @@ class Level: SCNNode {
         deleteCubes(col: posX, row: posY, radius: size)
     }
     
+    
+    /**
+     Function to delete a Level.
+     
+     Called by:
+     
+     MainScene.setupForegroundLevel()
+     */
     func delete() {
         self.removeFromParentNode()
     }
     
+    
+    /**
+     Function to handle LevelSquare deletion location for the explosion.
+     
+     - parameter pos: SCNVector3 of the position relative to the parent node.
+     - parameter rad: Int radius of explosion.
+     
+     Called by:
+     
+     MainScene.physicsWorld()
+     */
     func explode(pos: SCNVector3, rad: Int){
         var x = 0
         var y = numRows-1
@@ -161,6 +225,4 @@ class Level: SCNNode {
         }
         deleteCubes(col: x, row: y, radius: rad)
     }
-
-    
 }

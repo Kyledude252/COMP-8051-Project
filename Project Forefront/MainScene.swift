@@ -1,14 +1,12 @@
-//
-//  MainScene.swift
-//  Project Forefront
-//
-//  Created by user on 2/13/24.
-//
-
 import Foundation
 import SceneKit
 
 
+/**
+ Class representing the MainScene for the game.
+ 
+ MainScene inherits from SCNScene and SCNPhysicsContactDelegate.
+ */
 class MainScene: SCNScene, SCNPhysicsContactDelegate {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
@@ -42,56 +40,52 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     
     //grab view
     weak var scnView: SCNView?
-    // holds line for redrawing it
+    /// holds line for redrawing it
     var lineNode: SCNNode?
-    // throttle drawing line to prevent lag fest if needed, currently not used
+    /// throttle drawing line to prevent lag fest if needed, currently not used
     var isThrottling = false
-    // Store projeciles to remove alter
+    /// Store projeciles to remove alter
     var projectileStore = SCNNode()
-    // Adjusts how far the tank can shoot
+    /// Adjusts how far the tank can shoot
     var maxProjectileX: Float = 15.0
     var maxProjectileY: Float = 15.0
-    // used to determine whether player can fire or not
+    /// used to determine whether player can fire or not
     var ammunition: Int = 1
-    // used for ammo count
+    /// used for ammo count
     var ammoNode: SCNNode?
-    // used to check if player can move (is in move mode)
+    /// used to check if player can move (is in move mode)
     var canMove: Bool = true
-    // used for freezing movement during turn transition
+    /// used for freezing movement during turn transition
     var moveFlag: Bool = true
-    // Pause pressed
+    /// Pause pressed
     var pauseOn: Bool = false
-    // pause semaphore
+    /// pause semaphore
     let pauseSem = DispatchSemaphore(value: 0)
-    // used to check if turnEnd button is clicked
+    /// used to check if turnEnd button is clicked
     var turnEnded: Bool = false
-    // turn time
+    /// turn time
     var turnTime: Int = 20
-    // check if projectile is in the air
+    /// check if projectile is in the air
     var projectileIsFlying: Bool = false
-    // Semaphore for freezing projectile
+    /// Semaphore for freezing projectile
     let semaphore = DispatchSemaphore(value: 0)
-    // shot type use for semaphore, to stop waiting if firing laser
+    /// shot type use for semaphore, to stop waiting if firing laser
     var shotWhiff = 0
-    // explosion radius
+    /// explosion radius
     var explosionRadius = 10
-    // Damage taken from shot
+    /// Damage taken from shot
     var damage = 10
     
-    //var projectile: SCNNode?
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     
     weak var mainSceneViewModel: MainSceneViewModel?
     
-    // Initializer
+    
+    /**
+     Constructor for a MainScene.
+     */
     override init() {
         super.init()
         
-        
-
         physicsWorld.contactDelegate = self
         background.contents = UIColor.black
         
@@ -118,22 +112,72 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     
+    
+    /**
+     NSCoding Initializer - Unused
+     
+     - parameter aDecoder: NSCoder used for decoding a serialized MainScene object.
+     
+     Required
+     */
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
+    /**
+     A function that sets up the main scene view model of the scene.
+     
+     - parameter viewModel: the intended MainSceneViewModel.
+     
+     Called by:
+     
+     MainSceneViewModel.init()
+     */
     func setupViewModel(viewModel: MainSceneViewModel){
         mainSceneViewModel = viewModel
     }
     
+    
+    /**
+     A function that cleans up all the nodes in the scene.
+     
+     Called by:
+     
+     MainSceneViewModel.resetScene()
+     */
     func cleanup(){
         rootNode.childNodes.forEach { $0.removeFromParentNode() }
         NotificationCenter.default.removeObserver(self)
     }
     
-    // GRAPHICS // //////
+    
+    // //////////// GRAPHICS //////////// //
+    
+    
+    /**
+     A function that initiates the movement protocol.
+     
+     Called by:
+     
+     MainScene.init()
+     */
     @MainActor
     func firstUpdate() {
         tankMovement() // Call reanimate on the first graphics update frame
     }
     
-    // CAMERA // ////////////
+    
+    // ///////////// CAMERA ///////////// //
+    
+    
+    /**
+     A function that sets up the camera and position.
+     
+     Called by:
+     
+     MainScene.init()
+     */
     func setupCamera() {
         let camera = SCNCamera()
         cameraNode.camera = camera
@@ -143,19 +187,39 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         rootNode.addChildNode(cameraNode)
     }
     
+    
+    /**
+     A function that updates the camera position.
+     
+     - parameter cameraXOffset: a Float representing the x-offset.
+     - parameter cameraXOffset: a Float representing the y-offset.
+     
+     Defunct.
+     
+     Called by:
+     
+     ContentView.body,
+     MainSceneViewModel.updateCameraPosition()
+     */
     func updateCameraPosition(cameraXOffset: Float, cameraYOffset: Float) {
         //cameraNode.position = SCNVector3(cameraXOffset, cameraYOffset, cameraZOffset)
         print("updateCameraPos called")
     }
     
+    
+    /**
+     A function that sets up the audio player for the background music.
+     
+     Called by:
+     
+     ContentView.body
+     */
     func setupAudio(){
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             guard let BGSource = SCNAudioSource(named: "BGSong.mp3") else {
                     print("Failed to load BGSong.mp3")
                     return
                 }
-            
             //let BGSource = SCNAudioSource(named: "BGSong.mp3")!
             BGSource.loops = true
             BGSource.volume = 0.3
@@ -165,24 +229,34 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             self.rootNode.addAudioPlayer(BGSong)
             print("ADDED SONG")
         }
-        
-        
     }
     
     
-    // BACKGROUND / ENVIORNMENT // ////////////
+    // //////////// BACKGROUND / ENVIORNMENT //////////// //
+    
+    
+    /**
+     A function that sets up the background for the level.
+     
+     Called by:
+     
+     MainScene.init()
+     */
     func setupBackgroundLayers() {
         // For parallax perspective -
  
-        //Example starter code
-//        let backgroundNode1 = createBackgroundNode(imageName: "background-612x612.jpg", position: SCNVector3(0, 0, -10), size: CGSize(width: 100, height: 20))
         let backgroundNode2 = createBackgroundNode(imageName: "background-612x612.jpg", position: SCNVector3(0, 0, -20), size: CGSize(width: 260, height: 70))
-//
-        // Add the background nodes to the scene
-//        rootNode.addChildNode(backgroundNode1)
         rootNode.addChildNode(backgroundNode2)
     }
     
+    
+    /**
+     A function that creates and returns a plane with an image texture.
+     
+     Called by:
+     
+     MainScene.setupBackgroundLayers()
+     */
     func createBackgroundNode(imageName: String, position: SCNVector3, size: CGSize) -> SCNNode {
         let geometry = SCNPlane(width: size.width, height: size.height)
         geometry.firstMaterial?.diffuse.contents = UIImage(named: imageName)
@@ -194,6 +268,13 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     }
     
     
+    /**
+     A function that sets up the geometry for the level.
+     
+     Called by:
+     
+     MainScene.init()
+     */
     func setupForegroundLevel() {
         
         levelNode.delete()
@@ -208,6 +289,14 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         print("Position of levelNode after rotation: \(levelNode.position)")
     }
     
+    
+    /**
+     A function that sets up the lighting for the level.
+     
+     Called by:
+     
+     MainScene.init()
+     */
     func setupLights() {
         let ambientLight = SCNNode()
         ambientLight.light = SCNLight()
@@ -252,13 +341,25 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         rootNode.addChildNode(uLight)
     }
     
-    // PLAYER CONTROL & SWITCHING // ///////////
     
+    // //////////// PLAYER CONTROL & SWITCHING //////////// //
+    
+    
+    /**
+     A function that toggles the flag for the active player.
+     */
     func switchActivePlayer() {
         activePlayer = (activePlayer == 1) ? 2 : 1
     }
     
     
+    /**
+     A function that moves the tank leftward.
+     
+     Called by:
+     
+     MainSceneViewModel.moveTankLeft()
+     */
     func moveActivePlayerTankLeft() {
         // If player is not allowed to move, function is disabled
         if (canMove == false) {
@@ -270,6 +371,14 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         maxMovementPlayerSteps -= 1
     }
     
+    
+    /**
+     A function that moves the tank rightward.
+     
+     Called by:
+     
+     MainSceneViewModel.moveTankRight()
+     */
     func moveActivePlayerTankRight() {
         //If player is not allowed to move, function is disabled
         if (canMove == false) {
@@ -281,6 +390,14 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         maxMovementPlayerSteps -= 1
     }
     
+    
+    /**
+     A function that moves the tank upwards.
+     
+     Called by:
+     
+     MainSceneViewModel.rocketBoost()
+     */
     @MainActor
     func moveActivePlayerTankVertically(){
         // If player is not allowed to move, function is disabled
@@ -300,17 +417,42 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     
+    
+    /**
+     Stops the tank from being able to move left or right.
+     
+     Called by:
+     
+     MainScene.tankMovement(),
+     MainScene.toggleTurns(),
+     MainSceneViewModel.stopMoving()
+     */
     func stopMovingTank() {
         tankMovingLeft = false
         tankMovingRight = false
     }
     
     
-    // used in sceneKitView to match with firemode button
+    /**
+     A function that marks whether a tank can move, mutating a flag in MainScene
+     
+     - parameter move: a boolean flag for whether the tank can move.
+     
+     Defunct.
+     */
     func toggleTankMove(move: Bool) {
         canMove = move
     }
     
+    
+    /**
+     A function that handles the movement of a player's tank.
+     
+     Called by:
+     
+     MainScene.firstUpdate()
+     MainScene.tankMovement()
+     */
     @MainActor
     func tankMovement (){
         if maxMovementPlayerSteps > 0 {
@@ -345,18 +487,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             tankMovement()
         }
     }
+
     
-    // Temp function to debug damage
-//    func takeDamage() {
-//        if activePlayer == 1 {
-//            player1Tank.decreaseHealth(damage: 10)
-//            checkDeadCondition()
-//        } else if activePlayer == 2 {
-//            player2Tank.decreaseHealth(damage: 10)
-//            checkDeadCondition()
-//        }
-//    }
-    
+    /**
+     A function that checks if the game needs to be reset.
+     
+     - returns: bool of whether or not the game is over.
+     
+     Possibly defunct.
+     */
     func checkForReset() -> Bool {
         if (player1Tank.getHealth() <= 0 || player2Tank.getHealth() <= 0) {
             return true
@@ -365,6 +504,17 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     
+    
+    /**
+     A function that checks whether a player is dead.
+     
+     If it detects that a player is dead, it marks the other player as the winner.
+     
+     Called by:
+     
+     MainScene.handleTankProjectileCollision(),
+     MainScene.physicsWorld()
+     */
     func checkDeadCondition () {
         // a little duplicacated but fine for now
         
@@ -410,14 +560,33 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     
+    
+    /**
+     A function that resets the game to the start screen.
+     
+     Called by:
+     
+     SceneKitView.Coordinator.returnToMain(),
+     MainScene.checkDeadCondition()
+     */
     func resetToStartScreen() {
         toggleGameStarted?()
     }
+    
     
     //-------------------------------------------------------------------------------------------------------------------
     //Firing Code
     //-------------------------------------------------------------------------------------------------------------------
     //function that's sent to coordinator
+    
+    
+    /**
+     A function that toggles whether a tank is in firing mode.
+     
+     - parameter isFireMode: a bool value of whether or not the tank is in fire mode.
+     
+     Defunct.
+     */
     @objc
     func toggleFire(isFireMode: Bool){
         print(player1Tank.position)
@@ -428,7 +597,18 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         //tank firing object funciton
     }
     
+    
     //Takes in a start and end point of 3d Vectors and draws a custom line based on vertices between points
+    /**
+     Function that creates a parabola based on an initial vector.
+     
+     - parameter startPoint: the SCNVector3 position where the aiming vector starts.
+     - parameter endPoint: the SCNVector3 position where the aiming vector ends.
+     
+     Called by:
+     
+     SceneKitView.Coordinator.handlePan()
+     */
     func createTrajectoryLine(from startPoint: SCNVector3, to endPoint: SCNVector3) {
         //array containing start and end point of the line
         let vertices: [SCNVector3] = [startPoint, endPoint]
@@ -477,16 +657,20 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         
         let turretNode = playerTank?.tankModel.childNode(withName: "Gun", recursively: true)
         turretNode?.eulerAngles = SCNVector3(-angle,.pi/2,0)
-        
-
-        
-        
-        
     }
 
-    // type:
-    // 1. regular shot (lob)
-    // 2. laser
+
+    /**
+     A function that handles the launching of projectiles from a chosen point.
+     
+     - parameter startPoint: the SCNVector3 position where the aiming vector starts.
+     - parameter endPoint: the SCNVector3 position where the aiming vector ends.
+     - parameter type: an Int representing the weapon type. 1 is a regular lob, 2 is a laser, and 3 is a triple shot.
+     
+     Called by:
+     
+     SceneKitView.Coordinator.handlePan()
+     */
     func launchProjectile(from startPoint: SCNVector3, to endPoint: SCNVector3, type: Int) {
         // cannot fire if ammo = 0
         if (ammunition == 0) {
@@ -542,9 +726,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             
             //Dampen if going to far
             let dampenedForceVector = SCNVector3(forceVector.x * dampingFactor, forceVector.y * dampingFactor, forceVector.z)
-
-//            print("\nForce vector: \(forceVector) ")
-//            print("\ndampened: \(dampenedForceVector) ")
             
             //Apply force to node, dampen if too much force is applied
             // Normal shot w/ dampening ------------------------------------------------------------
@@ -606,7 +787,14 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     
-    //maybe works?
+    
+    /**
+     A function made to help the launchProjectile function.
+     
+     - parameter start: an SCNVector3 of the spawn position of the Projectile.
+     - parameter force: an SCNVector3 that represents the force vector to apply to the Projectile.
+     - parameter dampForce: an SCNVector3 that clamps the force
+     */
     func launchHelper(start: SCNVector3, force: SCNVector3, dampForce: SCNVector3) {
         var projectile: SCNNode?
         projectile = Projectile(from: start)
@@ -633,21 +821,55 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     
-    // removes line drawn for trajectory
+    
+    /**
+     A function that removes trajectory lines from the scene.
+     
+     Called by:
+     
+     MainScene.createTrajectoryLine(),
+     MainScene.launchProjectile(),
+     MainScene.toggleTurns()
+     */
     func removeLine() {
         self.lineNode?.removeFromParentNode()
     }
-    // used to remove all projectile nodes later
+    
+    
+    /**
+     A function that adds the projectile storage object to the root.
+     
+     Called by:
+     
+     MainScene.init()
+     */
     func setupProjectileStore() {
         self.rootNode.addChildNode(projectileStore)
     }
-    // same as above
+    
+    
+    /**
+     A function that removes all projectile nodes in the scene.
+     
+     Called by:
+     
+     MainScene.launchProjectile(),
+     MainScene.toggleTurns()
+     */
     func deleteProjectiles() {
         for childNode in projectileStore.childNodes {
             childNode.removeFromParentNode()
         }
     }
     
+    
+    /**
+     A function that handles the playing of weapon firing SFX.
+     
+     Called by:
+     
+     MainScene.launchProjectile()
+     */
     func playShootSound(){
         let shootSource = SCNAudioSource(named: "Shoot.mp3")
         shootSource?.loops = false
@@ -658,8 +880,14 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         rootNode.addAudioPlayer(shootFX)
     }
     
-    ///------------------------------------------------
-    // used to set-up text for ammunition
+    
+    /**
+     A function for setting up the ammo counter UI element.
+     
+     Called by:
+     
+     MainScene.init()
+     */
     func setUpAmmo() {
         let ammoBkg = SCNPlane(width: 9.5, height: 3)
         ammoBkg.cornerRadius = 0.8
@@ -682,7 +910,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         ammoNode?.addChildNode(bkgNode)
         self.rootNode.addChildNode(ammoNode!)
     }
-    // sets ammo to one, can be changed later to add different ammo for different weapon types
+    
+    
+    /**
+     A function to reset the player's ammo count.
+     
+     Called by:
+     
+     MainScene.toggleTurns()
+     */
     func giveAmmo() {
         ammunition = 1
         print("Got ammo, Ammunition: ", ammunition)
@@ -692,7 +928,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
         ammoNode?.childNodes.first?.geometry?.firstMaterial?.diffuse.contents = UIColor.green
     }
-    // sets ammo to 0, can be changed later
+    
+    
+    /**
+     A function to remove the player's remaining ammo.
+     
+     Called by:
+     
+     MainScene.launchProjectile()
+     */
     func removeAmmo() {
         ammunition = 0
         print("lost ammo, Ammunition: ", ammunition)
@@ -707,6 +951,12 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
     //------------------------------------------------------------------------------------------------
 
     
+    /**
+     A protocol of the SCNPhysicsContactDelegate that handles the programmatic VFX for creating an explosion.
+     
+     - parameter world: SCNPhysicsWorld to perform the physics in.
+     - parameter contact: the SCNPhysicsContact that contains the information of the collision.
+     */
     func physicsWorld(_ world:SCNPhysicsWorld, didBegin contact: SCNPhysicsContact){
         
         let contactMask = contact.nodeA.physicsBody!.categoryBitMask | contact.nodeB.physicsBody!.categoryBitMask
@@ -828,6 +1078,16 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         }
     }
     
+    
+    /**
+     A function that handles the programmatic VFX for creating an explosion.
+     
+     - parameter contact: an SCNPhysicsContact used for the position of the effect.
+     
+     Called by:
+     
+     MainScene.physicsWorld()
+     */
     func doExpLight(contact: SCNPhysicsContact) {
         let expLightNode = SCNNode()
         expLightNode.position = SCNVector3(x: contact.contactPoint.x, y: contact.contactPoint.y + 0.1, z: contact.contactPoint.z + 2)
@@ -868,6 +1128,16 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         expFlatNode.runAction(SCNAction.sequence([SCNAction.wait(duration: 0.3), SCNAction.removeFromParentNode()]))
     }
     
+    
+    /**
+     A function that returns the position of the active player.
+     
+     - returns: the SCNVector3 position of the active player.
+     
+     Called by:
+     
+     SceneKitView.handlePan()
+     */
     func getTankPosition() -> SCNVector3? {
         if activePlayer == 1 {
             return player1Tank.presentation.position
@@ -877,14 +1147,29 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         return nil
     }
     
-    // Menu button pressed
+    
+    /**
+     A function for handling the pausing of the game.
+     
+     Called by:
+     
+     SceneKitView.pasueGame()
+     */
     func pauseTriggered() {
         pauseOn = true
         // set this back on later
         canMove = false
         print("Paused")
     }
-    // Returns from pause menu
+    
+    
+    /**
+     A function for handling the return from the pause menu.
+     
+     Called by:
+     
+     SceneKitView.unPause()
+     */
     func returnFromMenu() {
         pauseOn = false
         canMove = true
@@ -892,7 +1177,15 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         print("Unpaused")
     }
     
+    
     // Used as a trigger within turn timer async to break out of the function entirely
+    /**
+     Function for handling the manual turn end.
+     
+     Called by:
+     
+     MainSceneViewModel.endTurn()
+     */
     func turnEndedPressed() {
         // if paused, can't end turn
         if(pauseOn) {
@@ -902,6 +1195,17 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         print("Turn End pressed")
     }
     
+    
+    /**
+     A function that handles the toggling of player turns.
+     
+     Acts as a loop, calling itself at the end.
+     
+     Called by:
+     
+     ContentView.body,
+     MainScene,toggleTurns()
+     */
     var count = 0
     func toggleTurns() {
         print("toggleTurns called")
@@ -995,7 +1299,6 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
                 DispatchQueue.main.async {
                     countdownNode?.removeFromParentNode()
                     winNode?.removeFromParentNode()
-
                 }
             }
 
@@ -1025,13 +1328,9 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             self.removeLine()
 
             self.projectileShot = false
-          
-
-
 
             //recursive call to pass turn to other palyer on turn end
             // may cause issues with manually triggering turn change
-            
             
             // Add buffer of time before passing control to avoid troll situations
             for i in (1...2).reversed() {
@@ -1067,37 +1366,46 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
             self.maxMovementPlayerSteps = 10
             self.playerBoostCount = 5
             self.mainSceneViewModel?.resetUIVariablesOnTurnChange()
-
-
         }
     }
     
-    func cameraShake (duration: TimeInterval, intensity: Float){
+    
+    /**
+     Function to apply camera shake to the scene camera.
+     
+     - parameter duration: a TimeInterval for the shake to last.
+     - parameter intensity: a Float representing the strength of the shaking.
+     
+     Called by:
+     
+     MainScene.launchProjectile(),
+     MainScene.physicsWorld()
+     */
+    func cameraShake(duration: TimeInterval, intensity: Float){
         let originalPosition = cameraNode.position
         
         let numShakeActions = Int(duration / 0.2)
         
         var shakeActions: [SCNAction] = []
         
-        
         let intensityDecayRate = intensity / Float(numShakeActions)
         var currentIntensity = intensity
         
         for _ in 0..<numShakeActions {
-                // Generate random offsets
-                let offsetX = Float.random(in: -currentIntensity...currentIntensity)
-                let offsetY = Float.random(in: -currentIntensity/2...currentIntensity/2)
-                let offsetZ = Float.random(in: -currentIntensity/2...currentIntensity/2)
+            // Generate random offsets
+            let offsetX = Float.random(in: -currentIntensity...currentIntensity)
+            let offsetY = Float.random(in: -currentIntensity/2...currentIntensity/2)
+            let offsetZ = Float.random(in: -currentIntensity/2...currentIntensity/2)
                 
             let shakeAction1 = SCNAction.move(by: SCNVector3(offsetX, offsetY, offsetZ), duration: 0.1)
             let shakeAction2 = SCNAction.move(by: SCNVector3(-offsetX * 2, -offsetY * 2, -offsetZ * 2), duration: 0.1)
                 
-                shakeActions.append(shakeAction1)
-                shakeActions.append(shakeAction2)
+            shakeActions.append(shakeAction1)
+            shakeActions.append(shakeAction2)
             
             currentIntensity -= intensityDecayRate
 
-            }
+        }
         
         // ease back after
         let easeBackAction = SCNAction.move(to: originalPosition, duration: 0.5)
@@ -1105,20 +1413,37 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         
         let shakeSequence = SCNAction.sequence(shakeActions)
             
-            cameraNode.runAction(shakeSequence) {
-                self.cameraNode.position = originalPosition
-            }
+        cameraNode.runAction(shakeSequence) {
+            self.cameraNode.position = originalPosition
+        }
     }
 
 
-    // PHYSICS // /////////////
+    // //////////// PHYSICS //////////// //
     
+    
+    /**
+     A function to handle Tank collision with a LevelSquare.
+     
+     - parameter tank: a Tank.
+     - parameter : a LevelSquare
+     
+     Defunct.
+     */
     func handleTankLevelSquareCollision(tank: Tank, levelSquare: LevelSquare) {
         // Enum to represent collision sides
        
     }
 
 
+    /**
+     A function to handle Projectile collision with a Tank.
+     
+     - parameter tank: a Tank.
+     - parameter projectile: a Projectile.
+     
+     Defunct.
+     */
     func handleTankProjectileCollision(tank: Tank, projectile: Projectile) {
         print("Tank collided with projectile")
         // Implement collision handling logic here
@@ -1126,28 +1451,17 @@ class MainScene: SCNScene, SCNPhysicsContactDelegate {
         checkDeadCondition()
     }
 
+    
+    /**
+     A function intended to handle Projectile collision with LevelSquare.
+     
+     - parameter levelSquare: a LevelSquare.
+     - parameter projectile: a Projectile.
+     
+     Defunct.
+     */
     func handleLevelSquareProjectileCollision(levelSquare: LevelSquare, projectile: Projectile) {
         print("Level square collided with projectile")
         // Implement collision handling logic here
-       
     }
-    
-
 }
-
-
-
-
-//extension MainScene: SCNPhysicsContactDelegate {
-//    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
-//        // Handle physics contact beginning
-//    }
-//
-//    func physicsWorld(_ world: SCNPhysicsWorld, didUpdate contact: SCNPhysicsContact) {
-//        // Handle physics contact update
-//    }
-//
-//    func physicsWorld(_ world: SCNPhysicsWorld, didEnd contact: SCNPhysicsContact) {
-//        // Handle physics contact ending
-//    }
-//}

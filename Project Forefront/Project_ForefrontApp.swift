@@ -1,13 +1,12 @@
-//
-//  Project_ForefrontApp.swift
-//  Project Forefront
-//
-//  Created by Kyle Alexander on 2024-01-31.
-//
-
 import SwiftUI
 import AVFoundation
 
+
+/**
+ A struct defining the structure of the app.
+ 
+ Project_ForefrontApp inherits from App.
+ */
 @main
 struct Project_ForefrontApp: App {
     
@@ -21,6 +20,14 @@ struct Project_ForefrontApp: App {
         }
     }
     
+    
+    /**
+     Function to handle the configuration of an audio session.
+     
+     Called by:
+     
+     Project_ForefrontApp.init()
+     */
     func configureAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setCategory(.ambient)

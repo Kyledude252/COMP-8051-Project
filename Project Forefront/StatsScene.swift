@@ -1,13 +1,12 @@
-//
-//  StatsScene.swift
-//  Project Forefront
-//
-//  Created by Nicky Cheng on 2024-03-31.
-//
-
 import Foundation
 import SceneKit
 
+
+/**
+ Class representing a StatsScene.
+ 
+ StatsScene inherits from SCNNode.
+ */
 class StatsScene : SCNScene {
     var cameraNode = SCNNode()
     var cameraXOffset: Float = 0
@@ -18,10 +17,10 @@ class StatsScene : SCNScene {
     let player1Stats = SCNNode()
     let player2Stats = SCNNode()
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not yet been implemented")
-    }
     
+    /**
+     Constructor for a StatsScene.
+     */
     override init() {
         super.init()
         
@@ -29,6 +28,26 @@ class StatsScene : SCNScene {
         setupStats()
     }
     
+    
+    /**
+     NSCoding Initializer - Unused
+     
+     - parameter coder: NSCoder used for decoding a serialized StatsScene object.
+     
+     Required
+     */
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not yet been implemented")
+    }
+    
+    
+    /**
+     Function for setting up the camera in the scene.
+     
+     Called by:
+     
+     StatsScene.init()
+     */
     func setupCamera() {
         let camera = SCNCamera()
         cameraNode.camera = camera
@@ -37,6 +56,14 @@ class StatsScene : SCNScene {
         rootNode.addChildNode(cameraNode)
     }
     
+    
+    /**
+     Function for setting up the stats of the players.
+     
+     Called by:
+     
+     StatsScene.init()
+     */
     func setupStats() {
         let player1Text = SCNText(string: String(format: "Player 1 Wins: %d", player1Wins), extrusionDepth: 0.0)
         let player2Text = SCNText(string: String(format: "Player 2 Wins: %d", player2Wins), extrusionDepth: 0.0)
@@ -53,6 +80,14 @@ class StatsScene : SCNScene {
         rootNode.addChildNode(player2Stats)
     }
     
+  
+    /**
+     Function for handling the updating of the stats in the scene.
+     
+     Called by:
+     
+     StatsSceneViewModel.updateStats()
+     */
     func updateStats() {
         player1Wins = UserDefaults.standard.integer(forKey: "Player1Wins")
         player2Wins = UserDefaults.standard.integer(forKey: "Player2Wins")

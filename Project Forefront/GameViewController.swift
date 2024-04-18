@@ -1,30 +1,44 @@
-//
-//  GameViewController.swift
-//  Project Forefront
-//
-//  Created by Nicky Cheng on 2024-03-30.
-//
-
 import Foundation
 import SceneKit
 import SwiftUI
 
+
+/**
+ Class representing a GameViewController.
+ 
+ GameViewController inherits from UIViewController.
+ */
 class GameViewController: UIViewController {
     var scene: SCNScene?
     
-    // Initializes view controller with scene
+
+    /**
+     Constructor for a GameViewController.
+     
+     - parameter scene: the scene to initialize.
+     */
     init(scene: SCNScene) {
         self.scene = scene
         super.init(nibName: nil, bundle: nil)
     }
     
-    // REQUIRED FOR VIEW CONTROLLER TO WORK
+    
+    /**
+     NSCoding Initializer - Unused
+     
+     - parameter coder: NSCoder used for serialization of the class.
+     
+     Required.
+     */
     @available(*, unavailable)
         required init?(coder: NSCoder) {
             fatalError("This class does not support NSCoder")
         }
     
-    // Loads a SceneKit View
+    
+    /**
+     Function for loading an SCNView of the GameViewController scene.
+     */
     override func loadView() {
         let scnView = SCNView(frame: .zero)
         scnView.scene = scene
